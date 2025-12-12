@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  socialchef-db:
+    image: postgres:16
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: socialchef
+    ports:
+      - "5445:5432"        # снаружи будет порт 5445
+    volumes:
+      - socialchef-db-data:/var/lib/postgresql/data
+
+volumes:
+  socialchef-db-data:
