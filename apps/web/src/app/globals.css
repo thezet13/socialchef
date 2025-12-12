@@ -1,0 +1,301 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@font-face {
+  font-family: 'Aboreto';
+  src: url('/fonts/Aboreto.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/Barlow.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Chewy';
+  src: url('/fonts/Chewy.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Codystar';
+  src: url('/fonts/Codystar.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ewert';
+  src: url('/fonts/Ewert.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Fascinate';
+  src: url('/fonts/Fascinate.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Barriecito';
+  src: url('/fonts/Barriecito.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/BebasNeue.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'BBH Bartle';
+  src: url('/fonts/BBHBartle.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'BBH Hegarte';
+  src: url('/fonts/BBHHegarte.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Iansui';
+  src: url('/fonts/Iansui.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Jua';
+  src: url('/fonts/Jua.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Katibeh';
+  src: url('/fonts/Katibeh.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lora';
+  src: url('/fonts/Lora.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lugrasimo';
+  src: url('/fonts/Lugrasimo.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/NotoSansKR.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans Symbols';
+  src: url('/fonts/NotoSansSymbols.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans TC';
+  src: url('/fonts/NotoSansTC.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald.ttf') format('truetype');
+  font-weight: 200 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Permanent Marker';
+  src: url('/fonts/PermanentMarker.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/Playfonts/PlayfairDisplay.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pridi';
+  src: url('/fonts/Pridi.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PTSerif';
+  src: url('/fonts/PTSerif.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Flex';
+  src: url('/fonts/RobotoFlex.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  src: url('/fonts/RobotoCondensed.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Serif';
+  src: url('/fonts/RobotoSerif.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  src: url('/fonts/RobotoSlab.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Rampart One';
+  src: url('/fonts/RampartOne.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Science Gothic';
+  src: url('/fonts/ScienceGothic.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Sekuya';
+  src: url('/fonts/Sekuya.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shojumaru';
+  src: url('/fonts/Shojumaru.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Spicy Rice';
+  src: url('/fonts/SpicyRice.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Texturina';
+  src: url('/fonts/Texturina.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ultra';
+  src: url('/fonts/Ultra.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Vast Shadow';
+  src: url('/fonts/VastShadow.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
