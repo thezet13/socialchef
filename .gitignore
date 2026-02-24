@@ -1,0 +1,103 @@
+# ---------------------------
+# Node.js
+# ---------------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------------------------
+# Environment files
+# ---------------------------
+.env
+.env.local
+.env.*.local
+
+# Для проектов turborepo / monorepo
+apps/*/.env
+apps/*/.env.local
+packages/*/.env
+packages/*/.env.local
+
+# ---------------------------
+# Build output
+# ---------------------------
+dist/
+build/
+out/
+.next/
+.vercel/
+tmp/
+temp/
+cache/
+.vscode/
+.idea/
+.DS_Store
+
+# ---------------------------
+# Prisma
+# ---------------------------
+prisma/dev.db
+prisma/dev.db-journal
+prisma/*.db
+prisma/*.sqlite
+prisma/migrations/*.lock
+**/*.db
+
+# ---------------------------
+# Uploads (AI images)
+# ---------------------------
+uploads/
+apps/api/uploads/
+apps/api/uploads/images/
+apps/api/uploads/**
+apps/api/fonts/
+apps/api/prisma/migrations/
+
+# ---------------------------
+# Logs
+# ---------------------------
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ---------------------------
+# OS junk
+# ---------------------------
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# ---------------------------
+# TypeScript
+# ---------------------------
+*.tsbuildinfo
+
+# ---------------------------
+# Next.js cache
+# ---------------------------
+.next/
+out/
+*.map
+
+# ---------------------------
+# Docker
+# ---------------------------
+*~ 
+docker-data/
+docker/volumes/
+docker/mysql/
+docker/postgres/
+docker/redis/
+
+# ---------------------------
+# Local editor configs
+# ---------------------------
+*.swp
+*.swo
+.vscode/
+.idea/

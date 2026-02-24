@@ -1,0 +1,21 @@
+{
+  "name": "@socialchef/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./billing": "./dist/billing/index.js",
+    "./brandStickers": "./dist/brandStickers/index.js",
+    "./brand-content": "./dist/brand-content/index.js",
+    "./brand-styles": "./dist/brand-styles/index.js",
+    "./brand-fonts": "./dist/brand-fonts/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.2.1"
+  }
+}

@@ -1,0 +1,657 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  USER
+  SUPERADMIN
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  fullName     String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+
+  // Сброс пароля на будущее
+  resetToken          String?
+  resetTokenExpiresAt DateTime?
+
+  // Отношения
+  ownedTenants Tenant[]     @relation("TenantOwner")
+  memberships  UserTenant[]
+
+  role UserRole @default(USER)
+
+  proDesigns  ProDesign[]
+  fonts       FontAsset[]
+  brandStyles BrandStyle[]
+
+  styles         Style[]
+  presets        Preset[]
+  usageEvents    UsageEvent[]
+  adminAuditLogs AdminAuditLog[]
+
+  @@index([createdAt])
+}
+
+enum UsageActionType {
+  ADD_STYLE
+  RESTYLE_PREVIEW
+  RESTYLE_TRY_AGAIN
+  PRESET_SWAP_DISH
+  DISH_CUTOUT_PIC
+  EXPAND_BACKGROUND
+  APPLY_PRESET
+  ADD_BRANDSTYLE
+  BAKE_BRANDSTYLE
+  UPSCALE
+  EXPORT
+}
+
+enum AdminAuditAction {
+  TENANT_ACTIVATE
+  TENANT_DEACTIVATE
+  TENANT_DELETE_SOFT
+  TENANT_ADD_CREDITS
+  TENANT_CHANGE_PLAN
+  ASSET_DELETE
+  RETENTION_RUN
+}
+
+model UsageEvent {
+  id          String          @id @default(cuid())
+  tenantId    String
+  userId      String?
+  actionType  UsageActionType
+  creditsCost Int             @default(0)
+  metaJson    Json?
+  createdAt   DateTime        @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user   User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([actionType, createdAt])
+}
+
+model AdminAuditLog {
+  id             String           @id @default(cuid())
+  actorUserId    String
+  actorTenantId  String?
+  action         AdminAuditAction
+  targetTenantId String?
+  targetUserId   String?
+  detailsJson    Json?
+  createdAt      DateTime         @default(now())
+
+  actorUser User @relation(fields: [actorUserId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([action])
+  @@index([targetTenantId])
+}
+
+model Tenant {
+  id   String @id @default(cuid())
+  name String
+
+  slug      String?   @unique
+  locale    String    @default("en") // основная локаль ресторана
+  timezone  String? // на будущее, для календаря постов
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  lastActivityAt  DateTime?
+
+  isActive        Boolean   @default(true)
+  lastCountryCode String?
+
+  ownerId String
+  owner   User   @relation("TenantOwner", fields: [ownerId], references: [id])
+
+  memberships UserTenant[]
+
+  subscription Subscription?
+  usagePeriods AIUsagePeriod[]
+
+  posts        GeneratedPost[]
+  images       GeneratedImage[]
+  contentPlans ContentPlan[]
+
+  proDesigns ProDesign[]
+  fonts      FontAsset[]
+
+  styles Style[]
+
+  creditBalance TenantCreditBalance?
+  creditLedger  CreditLedger[]
+  presets       Preset[]
+  brandStyles   BrandStyle[]
+  usageEvents   UsageEvent[]
+
+  @@index([ownerId])
+  @@index([createdAt])
+}
+
+model UserTenant {
+  id        String     @id @default(cuid())
+  userId    String
+  tenantId  String
+  role      TenantRole @default(OWNER)
+  createdAt DateTime   @default(now())
+
+  user   User   @relation(fields: [userId], references: [id])
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([userId, tenantId])
+  @@index([tenantId])
+  @@index([userId])
+}
+
+enum TenantRole {
+  OWNER
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+model Subscription {
+  id       String @id @default(cuid())
+  tenantId String @unique
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  plan       PlanType
+  status     SubscriptionStatus @default(ACTIVE)
+  interval   BillingInterval    @default(MONTH)
+  currency   String             @default("usd")
+  priceCents Int // цена в центах для текущего плана
+
+  stripeCustomerId String?
+  stripeSubId      String?
+  stripePriceId    String?
+
+  trialEndsAt        DateTime?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+  @@index([plan])
+}
+
+enum PlanType {
+  FREE
+  EDITOR
+  PRO
+  PRO_PLUS
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+}
+
+enum BillingInterval {
+  MONTH
+  YEAR
+}
+
+model TenantCreditBalance {
+  tenantId String @id
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  balanceCredits Int      @default(0) // integer credits
+  updatedAt      DateTime @updatedAt
+  createdAt      DateTime @default(now())
+}
+
+model CreditLedger {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  action       String
+  deltaCredits Int // negative = charge, positive = refund/topup
+  metaJson     Json?
+  createdAt    DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+
+model GeneratedPost {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  type     PostType
+  language String // "en" | "ru" | "az"
+  tone     String? // "friendly" | "premium" и т.д.
+
+  prompt    String // то, что ввёл пользователь (описание блюда/акции)
+  mainText  String // основной текст поста
+  shortText String? // укороченный вариант
+  hashtags  String // можно хранить "#aaa #bbb" или JSON-строку
+  cta       String? // call-to-action
+
+  // Для расширения (например, хранить структуру ответа модели)
+  meta Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([type])
+}
+
+enum PostType {
+  DISH
+  PROMO
+  BRAND_STORY
+  TEAM
+  SALES
+  STORY_CAPTION
+}
+
+model GeneratedImage {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  prompt   String // текстовое описание/запрос
+  style    String? // "instagram_dark", "clean_white", etc.
+  imageUrl String // путь к файлу (S3/Spaces)
+  width    Int
+  height   Int
+
+  // На будущее — источник (AI, upload)
+  origin ImageOrigin @default(AI)
+
+  proDesignId String?
+  proDesign   ProDesign? @relation(fields: [proDesignId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+}
+
+model ProDesign {
+  id       String  @id @default(cuid())
+  tenantId String
+  userId   String
+  prompt   String
+  style    String?
+  width    Int
+  height   Int
+
+  baseImageUrl  String // путь к базовой AI-картинке (без текста)
+  finalImageUrl String? // путь к финальной картинке (с текстом)
+
+  backgroundImageUrl String?
+  foregroundImageUrl String?
+
+  backgroundTransformJson Json?
+  foregroundTransformJson Json?
+
+  presetId String?
+  preset   Preset? @relation(fields: [presetId], references: [id], onDelete: SetNull)
+
+  overlayJson          Json? // overlay-конфиг (title/subtitle/price или массив items)
+  baseTransformJson    Json?
+  imageAdjustmentsJson Json?
+  baseWidth            Int?
+  baseHeight           Int?
+  formatId             String?
+
+  status ProDesignStatus @default(DRAFT)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  generatedImages GeneratedImage[]
+  assets          ProDesignAsset[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+enum ProDesignStatus {
+  DRAFT
+  RENDERED
+  ARCHIVED
+}
+
+enum ImageOrigin {
+  AI
+  UPLOAD
+}
+
+model ContentPlan {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  month Int // 1–12
+  year  Int
+
+  title    String?
+  planJson Json // [{ date, idea, type, note }...]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, month, year])
+  @@index([tenantId, createdAt])
+}
+
+model AIUsagePeriod {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  periodStart DateTime
+  periodEnd   DateTime
+
+  textCount  Int @default(0) // сколько текстов сгенерено в период
+  imageCount Int @default(0) // сколько картинок
+  planCount  Int @default(0) // сколько контент-планов
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, periodStart, periodEnd])
+  @@index([tenantId, periodEnd])
+}
+
+enum FontProvider {
+  GOOGLE
+  UPLOAD
+  SYSTEM
+}
+
+enum FontStyle {
+  NORMAL
+  ITALIC
+}
+
+enum BrandStyleScope {
+  SYSTEM
+  TENANT
+}
+
+enum BrandStyleStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+model FontAsset {
+  id       String  @id @default(cuid())
+  tenantId String
+  userId   String?
+
+  // NEW: source/provider
+  provider FontProvider @default(UPLOAD)
+
+  family String
+
+  // NEW: font variant info (for Google Fonts / matching)
+  style  FontStyle @default(NORMAL)
+  weight Int       @default(400)
+
+  // Existing (keep compatibility with your current uploads)
+  fileName String
+  mimeType String?
+
+  // NEW: cache integrity + normalized file pointer
+  fileUrl String? // e.g. "/uploads/fonts/xxx.ttf" (optional, can be derived from fileName)
+  sha256  String? // optional
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User?  @relation(fields: [userId], references: [id])
+
+  @@unique([tenantId, provider, family, style, weight])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, provider])
+}
+
+enum PresetScope {
+  SYSTEM
+  TENANT
+}
+
+enum PresetAccess {
+  FREE
+  EDITOR
+  PRO
+}
+
+enum PresetStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Preset {
+  id       String       @id @default(cuid())
+  tenantId String?
+  scope    PresetScope  @default(SYSTEM)
+  access   PresetAccess @default(FREE)
+  status   PresetStatus @default(PUBLISHED)
+
+  title     String
+  subtitle  String?
+  tags      String[] @default([])
+  sortOrder Int      @default(0)
+
+  format      String
+  prompt      String?
+  imageOrigin ImageOrigin @default(AI)
+
+  style String?
+
+  thumbnailUrl String?
+
+  thumbnailW Int?
+  thumbnailH Int?
+
+  overlay Json?
+
+  backgroundImageUrl String?
+  foregroundImageUrl String?
+
+  backgroundTransformJson Json?
+  foregroundTransformJson Json?
+
+  swapDishEnabled Boolean @default(false)
+
+  dishType String?
+
+  tenant    Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  createdBy User?   @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  baseImageUrl         String?
+  baseTransformJson    Json?
+  imageAdjustmentsJson Json?
+  baseWidth            Int?
+  baseHeight           Int?
+
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  presetAssets PresetAsset[]
+
+  proDesigns ProDesign[]
+
+  @@index([createdById])
+  @@index([tenantId])
+  @@index([scope, access, status, sortOrder])
+  @@index([updatedAt])
+}
+
+enum AssetKind {
+  LIBRARY_BASE_IMAGE
+  LIBRARY_OVERLAY_PIC
+  GENERATED_RENDER
+  PRESET_THUMBNAIL
+  DESIGN_BASE_IMAGE
+  DESIGN_SOURCE_UPLOAD
+  DESIGN_OVERLAY_PIC
+  STYLE_ORIGINAL
+  STYLE_THUMB
+  BRAND_STYLE_ORIGINAL
+  BRAND_STYLE_THUMB
+}
+
+enum AssetStatus {
+  ACTIVE
+  DELETED
+}
+
+model Asset {
+  id       String      @id @default(cuid())
+  tenantId String
+  kind     AssetKind
+  status   AssetStatus @default(ACTIVE)
+
+  storagePath String
+  bytes       Int?
+  width       Int?
+  height      Int?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  lastUsedAt DateTime?
+
+  // связи (для подсчёта usage)
+  presetLinks PresetAsset[]
+  designLinks ProDesignAsset[]
+  deletedAt   DateTime?
+
+  @@unique([tenantId, storagePath])
+  @@index([status, deletedAt])
+  @@index([tenantId, kind, status])
+  @@index([tenantId, status])
+}
+
+model PresetAsset {
+  presetId String
+  assetId  String
+  kind     AssetKind? // опционально (можно не хранить)
+
+  preset Preset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+  asset  Asset  @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@id([presetId, assetId])
+  @@index([assetId])
+}
+
+model ProDesignAsset {
+  proDesignId String
+  assetId     String
+  kind        AssetKind?
+
+  proDesign ProDesign @relation(fields: [proDesignId], references: [id], onDelete: Cascade)
+  asset     Asset     @relation(fields: [assetId], references: [id], onDelete: Restrict)
+
+  @@id([proDesignId, assetId])
+  @@index([assetId])
+}
+
+enum StyleScope {
+  SYSTEM
+  TENANT
+}
+
+enum StyleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Style {
+  id     String      @id @default(cuid())
+  scope  StyleScope  @default(SYSTEM)
+  status StyleStatus @default(PUBLISHED)
+
+  tenantId String?
+  userId   String?
+
+  title       String
+  description String?
+  tags        String[] @default([])
+  sortOrder   Int      @default(0)
+
+  // Картинки стиля (путь в storage / uploads)
+  referenceImageUrl String
+  referenceW        Int?
+  referenceH        Int?
+
+  thumbnailUrl String
+  thumbnailW   Int?
+  thumbnailH   Int?
+
+  // Промпт, который реально используется в restyle
+  prompt     String
+  promptAuto String?
+  promptMeta Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([scope, status, sortOrder])
+  @@index([tenantId, status, sortOrder])
+  @@index([userId, status, sortOrder])
+  @@index([updatedAt])
+}
+
+model BrandStyle {
+  id String @id @default(cuid())
+
+  // SYSTEM = tenantId null
+  scope  BrandStyleScope  @default(SYSTEM)
+  status BrandStyleStatus @default(ACTIVE)
+
+  tenantId String?
+  userId   String?
+
+  name           String
+  thumbnailUrl   String?
+  // Uploaded brand reference image
+  sourceImageUrl String
+  sourceW        Int?
+  sourceH        Int?
+
+  // Core data
+  styleRecipeJson Json
+  fontMetaJson    Json?
+
+  fontsResolvedJson Json?
+
+  // For preview cache invalidation
+  version Int @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant? @relation(fields: [tenantId], references: [id], onDelete: SetNull)
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([scope, status, updatedAt])
+  @@index([tenantId, status, updatedAt])
+  @@index([userId, status, updatedAt])
+}

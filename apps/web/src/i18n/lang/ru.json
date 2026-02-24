@@ -1,0 +1,14 @@
+{
+  "lang.en": "English",
+  "lang.ru": "Русский",
+  "lang.az": "Azərbaycan",
+  "common.ok": "ОК",
+  "common.cancel": "Отмена",
+  "common.close": "Закрыть",
+
+  "dialog.warning": "Внимание",
+
+  "app.title": "SocialChef",
+  "editor.uploadFirst": "Сначала загрузите или сгенерируйте изображение.",
+  "credits.cost": "{n} кредитов"
+}

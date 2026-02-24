@@ -1,0 +1,14 @@
+{
+  "lang.en": "English",
+  "lang.ru": "Russian",
+  "lang.az": "Azerbaijani",
+  "common.ok": "OK",
+  "common.cancel": "Cancel",
+  "common.close": "Close",
+
+  "dialog.warning": "Warning",
+
+  "app.title": "SocialChef",
+  "editor.uploadFirst": "Upload or generate image first.",
+  "credits.cost": "{n} credits"
+}

@@ -1,0 +1,1 @@
+export const SYSTEM_TENANT_ID = "SYSTEM";

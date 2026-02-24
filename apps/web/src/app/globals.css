@@ -1,0 +1,437 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, system-ui, sans-serif;
+}
+
+
+.bg-checker {
+  background-image:
+    linear-gradient(45deg, rgba(255,255,255,0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255,255,255,0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.06) 75%);
+  background-size: 24px 24px;
+  background-position: 0 0, 0 12px, 12px -12px, -12px 0px;
+}
+
+
+
+:root {
+  --nav-hidden: 0;
+}
+
+.nav {
+  opacity: calc(1 - var(--nav-hidden));
+  transform: translateY(calc(var(--nav-hidden) * -4px));
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  /* visible state defaults */
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* when hidden = 1 */
+html[style*="--nav-hidden: 1"] .nav {
+  pointer-events: none;
+  visibility: hidden;
+}
+
+
+
+
+/* ===== Custom thin scrollbar ===== */
+
+/* applies to the element that has overflow-y: auto and the class */
+.scrollbar-thin-custom {
+  scrollbar-width: thin;              /* Firefox (only: auto|thin|none) */
+  scrollbar-color: #3b4a5d transparent;/* Firefox */
+}
+
+/* Chrome / Edge / Safari */
+.scrollbar-thin-custom::-webkit-scrollbar {
+  width: 6px;      /* <-- ширина */
+  height: 6px;     /* если будет horizontal */
+}
+
+.scrollbar-thin-custom::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin-custom::-webkit-scrollbar-thumb {
+  background-color: rgba(75, 86, 100, 0.8);
+  border-radius: 999px;
+  border: 2px solid transparent;      /* <-- делает thumb “тоньше” визуально */
+  background-clip: content-box;
+}
+
+.scrollbar-thin-custom::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(70, 82, 98, 0.8); 
+}
+
+
+input.ui-num[type="number"] {
+  padding-right: 0.5rem;
+}
+
+input.ui-num[type="number"]::-webkit-inner-spin-button,
+input.ui-num[type="number"]::-webkit-outer-spin-button {
+  background: transparent;
+  border: none;
+  opacity: 0.3;
+  filter: invert(1) brightness(1.6);
+  margin-right: -5px;
+  padding: 0;
+  width: 14px;
+  height: auto;
+}
+
+input.ui-num[type="number"]{
+  forced-color-adjust: none;
+}
+
+
+/* ===== Select dropdown: unified dark + custom arrow ===== */
+select.ui-select {
+  color-scheme: dark;          /* Edge/Chromium: dark native menu feel */
+  forced-color-adjust: none;   /* Edge: don't override with system colors */
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  /* место под стрелку */
+  padding-right: 1.75rem;
+
+  /* стрелка (белая, тонкая) */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.75)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 12px 12px;
+}
+
+/* hover — чуть ярче стрелка */
+select.ui-select:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.92)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}
+
+/* focus — чтобы не дёргался фон */
+select.ui-select:focus {
+  outline: none;
+}
+
+select.ui-select:focus-visible {
+  outline: none;
+}
+
+
+
+
+@font-face {
+  font-family: 'Aboreto';
+  src: url('/fonts/Aboreto.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Barlow';
+  src: url('/fonts/Barlow.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Chewy';
+  src: url('/fonts/Chewy.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Codystar';
+  src: url('/fonts/Codystar.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Dancing Script';
+  src: url('/fonts/DancingScript.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ewert';
+  src: url('/fonts/Ewert.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Fascinate';
+  src: url('/fonts/Fascinate.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+
+@font-face {
+  font-family: 'Barriecito';
+  src: url('/fonts/Barriecito.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bebas Neue';
+  src: url('/fonts/BebasNeue.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'BBH Bartle';
+  src: url('/fonts/BBHBartle.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'BBH Hegarte';
+  src: url('/fonts/BBHHegarte.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Iansui';
+  src: url('/fonts/Iansui.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('/fonts/Inter.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+@font-face {
+  font-family: "Inter";
+  src: url("/fonts/Inter-Italic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Jua';
+  src: url('/fonts/Jua.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Katibeh';
+  src: url('/fonts/Katibeh.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lora';
+  src: url('/fonts/Lora.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Lugrasimo';
+  src: url('/fonts/Lugrasimo.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/Montserrat.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/NotoSansKR.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans Symbols';
+  src: url('/fonts/NotoSansSymbols.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Noto Sans TC';
+  src: url('/fonts/NotoSansTC.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Oswald';
+  src: url('/fonts/Oswald.ttf') format('truetype');
+  font-weight: 200 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  src: url('/fonts/Outfit.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Permanent Marker';
+  src: url('/fonts/PermanentMarker.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/fonts/PlayfairDisplay.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Pridi';
+  src: url('/fonts/Pridi.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PTSerif';
+  src: url('/fonts/PTSerif.ttf') format('truetype');
+  font-weight: 400 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Rampart One';
+  src: url('/fonts/RampartOne-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Flex';
+  src: url('/fonts/RobotoFlex.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Condensed';
+  src: url('/fonts/RobotoCondensed.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Serif';
+  src: url('/fonts/RobotoSerif.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roboto Slab';
+  src: url('/fonts/RobotoSlab.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Science Gothic';
+  src: url('/fonts/ScienceGothic.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Sekuya';
+  src: url('/fonts/Sekuya.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Shojumaru';
+  src: url('/fonts/Shojumaru.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Spicy Rice';
+  src: url('/fonts/SpicyRice.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Texturina';
+  src: url('/fonts/Texturina.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Ultra';
+  src: url('/fonts/Ultra.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Vast Shadow';
+  src: url('/fonts/VastShadow.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
