@@ -32,9 +32,42 @@ type TenantAggRow = {
   bytes: number;
 };
 
+type InactiveTenantsResult =
+  | { skipped: true }
+  | { processed: number; deactivated: number; purgedAssets?: number };
+
+function isSkippedInactiveTenants(
+  v: InactiveTenantsResult | undefined
+): v is { skipped: true } {
+  return !!v && typeof v === "object" && "skipped" in v;
+}
+
+type RetentionResult = {
+  tookMs?: number;
+  preview?: {
+    deleted?: number;
+  };
+  exportHistory?: {
+    deleted?: number;
+    assetsMarkedDeleted?: number;
+  };
+  orphan?: {
+    markedDeleted?: number;
+  };
+  purgedDeleted?: {
+    purged?: number;
+  };
+  inactiveTenants?: InactiveTenantsResult;
+};
+
 type RetentionResponse = {
-  opts: any;
-  result: any;
+  opts: {
+    previewTtlHours: number;
+    orphanAfterDays: number;
+    purgeDeletedBatch: number;
+    runInactiveTenantsPurge: boolean;
+  };
+  result: RetentionResult;
   pendingDeleted?: PreviewAssetRow[];
   orphanCandidates?: PreviewAssetRow[];
   pendingByTenant?: TenantAggRow[];
@@ -173,7 +206,7 @@ export default function AdminFilesPage() {
   );
 }
 
-function Card({ label, value }: { label: string; value: any }) {
+function Card({ label, value }: { label: string; value: string | number | undefined | null }) {
   return (
     <div className="rounded-2xl border border-slate-800 bg-slate-950/40 p-4">
       <div className="text-xs text-slate-500">{label}</div>
@@ -189,15 +222,23 @@ function formatBytes(bytes: number) {
   return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
 }
 
-function ReportGrid({ data }: { data: any }) {
-  const items = [
-    ["preview.deleted", data?.preview?.deleted],
-    ["exportHistory.deleted", data?.exportHistory?.deleted],
-    ["exportHistory.assetsMarkedDeleted", data?.exportHistory?.assetsMarkedDeleted],
-    ["orphan.markedDeleted", data?.orphan?.markedDeleted],
-    ["purgedDeleted.purged", data?.purgedDeleted?.purged],
-    ["inactiveTenants", data?.inactiveTenants?.skipped ? "skipped" : JSON.stringify(data?.inactiveTenants)],
+function ReportGrid({ data }: { data: RetentionResult }) {
+  const inactive =
+    isSkippedInactiveTenants(data.inactiveTenants)
+      ? "skipped"
+      : data.inactiveTenants
+      ? JSON.stringify(data.inactiveTenants)
+      : undefined;
+
+  const items: Array<[string, React.ReactNode]> = [
+    ["preview.deleted", data.preview?.deleted],
+    ["exportHistory.deleted", data.exportHistory?.deleted],
+    ["exportHistory.assetsMarkedDeleted", data.exportHistory?.assetsMarkedDeleted],
+    ["orphan.markedDeleted", data.orphan?.markedDeleted],
+    ["purgedDeleted.purged", data.purgedDeleted?.purged],
+    ["inactiveTenants", inactive],
   ];
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
       {items.map(([k, v]) => (
