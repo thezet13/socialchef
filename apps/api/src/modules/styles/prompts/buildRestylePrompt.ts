@@ -1,4 +1,4 @@
-import { type FormatId } from "@/modules/ai/types/ai.types";
+import { type FormatId } from "../../../modules/ai/types/ai.types";
 
 export type StyleBehavior = {
   dishPlacement?: "AUTO" | "KEEP_ORIGINAL" | "USE_STYLE_CONTAINER";
