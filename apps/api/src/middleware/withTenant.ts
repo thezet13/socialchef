@@ -23,7 +23,7 @@ function touchTenantActivityBestEffort(tenantId: string) {
   prisma.tenant
     .update({
       where: { id: tenantId },
-      data: { lastActiveAt: new Date() },
+      data: { lastActivityAt: new Date() },
     })
     .catch(() => {
       // ignore

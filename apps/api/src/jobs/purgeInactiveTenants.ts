@@ -12,7 +12,7 @@ export async function purgeInactiveTenants(opts: { dryRun?: boolean }) {
   const freeTenants = await prisma.tenant.findMany({
     where: {
       subscription: { is: null }, // или plan=FREE, зависит от твоей логики
-      lastActiveAt: { lt: freeCutoff },
+      lastActivityAt: { lt: freeCutoff },
     },
     select: { id: true },
   });
