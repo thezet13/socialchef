@@ -50,14 +50,13 @@ import { applyCreditsFromResponse } from "@/lib/applyCreditsFromResponse";
 import { AppliedPresetDesign, EditorPreset } from "@/features/presets/preset.editor.types";
 
 import { BaseSource } from "@/components/BaseImageChooserModal";
-import { applyPresetToDesign } from "@/features/presets/presets.api";
 import { buildEditorStateFromRenderOverlay } from "@/features/presets/hydrateEditorFromPreset";
 
 import { uploadBrandStyleImage, analyzeBrandStyle, createBrandStyle, listBrandStyles, deleteBrandStyle } from "@/features/brandStyles/brandStyles.api";
 import { BrandStylePickerGrid } from "@/components/BrandStylePickerGrid";
 
 import { BakeBrandStyleModal } from "@/components/BakeBrandStyleModal";
-import type { BrandStyleListItem } from "@socialchef/shared/brand-styles";
+import type { BrandStyleListItem } from "@/features/brandStyles/brandStyles.types";
 import { useGlobalDialog } from "@/components/GlobalDialogProvider";
 
 import { ApplyPresetModal } from "@/components/ApplyPresetModal";

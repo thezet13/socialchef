@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
-import { BrandStyleListItem } from "@socialchef/shared/brand-styles";
+import { BrandStyleListItem } from "../brand-styles/brandStyles.types";
 import { FontCategory, FontHint, FontRef, NormalizedStyleRecipe, TokenBlock, TokenVariant } from "./brandStyles.types";
 
 export function isLocalhostUrl(u: string) {

@@ -14,19 +14,17 @@ import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { ensureDir, uploadBrandStyleImage } from "@/lib/uploads";
 import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
 import { ensureCreditsOrThrow, PaywallError } from "@/modules/billing/credits.guard";
-
-import type {
-  AnalyzeBrandStyleBody,
-  AnalyzeBrandStyleResponse,
-  CreateBrandStyleBody,
-  CreateBrandStyleResponse,
-  ListBrandStylesResponse,
-  UploadBrandStyleResponse,
-} from "@socialchef/shared/brand-styles";
 import { drawCover } from "@/lib/drawCover";
 import { fileToDataUrl, isLocalhostUrl, normalizeStyleRecipeFromAi, normalizeUploadsUrl, toAbsoluteUrl, toListItem, uploadsAbsPathWithFolder } from "./brandStyles.service";
 
-import { analyzeBodySchema, createBodySchema, listQuerySchema } from "./brandStyles.types"
+import { analyzeBodySchema, createBodySchema, listQuerySchema,
+  type AnalyzeBrandStyleBody,
+  type AnalyzeBrandStyleResponse,
+  type CreateBrandStyleBody,
+  type CreateBrandStyleResponse,
+  type ListBrandStylesResponse,
+  type UploadBrandStyleResponse,
+ } from "./brandStyles.types"
 
 export const brandStylesRouter = Router();
 
