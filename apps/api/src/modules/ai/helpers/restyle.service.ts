@@ -1,4 +1,4 @@
-import { FormatId } from "@/modules/styles/prompts/buildRestylePrompt";
+import { type FormatId } from "@/modules/ai/types/ai.types";
 
 export function inferFormatId(w: number, h: number): FormatId {
   const r = w / h;
