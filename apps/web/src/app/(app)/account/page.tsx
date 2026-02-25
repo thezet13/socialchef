@@ -1,4 +1,4 @@
-import AccountPage from "@/features/account/AccountPage";
+import AccountPage from "../../../features/account/AccountPage";
 
 export default function Page() {
   return (

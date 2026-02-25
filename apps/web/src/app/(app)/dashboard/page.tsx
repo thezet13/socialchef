@@ -1,9 +1,9 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { apiFetch } from "@/lib/apiClient";
-import { getErrorMessage } from "@/lib/getErrorMessage";
+import { useAuth } from "../../../context/AuthContext";
+import { apiFetch } from "../../../lib/apiClient";
+import { getErrorMessage } from "../../../lib/getErrorMessage";
 
 type PostType = "DISH" | "PROMO" | "BRAND_STORY" | "TEAM" | "SALES" | "STORY_CAPTION";
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { apiFetch } from "@/lib/apiClient";
-import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "../../lib/apiClient";
+import { useAuth } from "../../context/AuthContext";
 
 type CapabilitiesDto = {
     role?: "USER" | "SUPERADMIN";

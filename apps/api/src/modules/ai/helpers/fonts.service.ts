@@ -1,8 +1,7 @@
-import { PRO_FONTS } from "@socialchef/pro-fonts";
 import path from "path";
 import fs from "fs";
 import { GlobalFonts } from '@napi-rs/canvas';
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../../../lib/prisma";
 import multer from "multer";
 
 export const fontsDir = path.join(process.cwd(), "uploads", "fonts");

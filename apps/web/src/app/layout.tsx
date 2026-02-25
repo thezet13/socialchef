@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { AuthProvider } from "../context/AuthContext";
-import { inter } from "@/lib/fonts";
-import { GlobalDialogProvider } from "@/components/GlobalDialogProvider";
-import { LanguageProvider } from "@/i18n/LanguageProvider";
+import { inter } from "../lib/fonts";
+import { GlobalDialogProvider } from "../components/GlobalDialogProvider";
+import { LanguageProvider } from "../i18n/LanguageProvider";
 
 export const metadata: Metadata = {
   title: "SocialChef",

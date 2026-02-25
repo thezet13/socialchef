@@ -1,4 +1,4 @@
-import type { RenderOverlay } from "@/features/editor/editor.types";
+import type { RenderOverlay } from "../../features/editor/editor.types";
 
 export const DEFAULT_IMAGE_ADJUSTMENTS: ImageAdjustments = {
   brightness: 0,

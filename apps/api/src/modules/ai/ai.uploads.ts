@@ -1,8 +1,8 @@
 import { Router } from "express";
 import path from "path";
-import { requireAuth } from "@/middleware/requireAuth";
-import { withTenant } from "@/middleware/withTenant";
-import { uploadSingleImage } from "@/lib/uploads";
+import { requireAuth } from "../..//middleware/requireAuth";
+import { withTenant } from "../..//middleware/withTenant";
+import { uploadSingleImage } from "../..//lib/uploads";
 
 type UploadImageResponse = { url: string };
 

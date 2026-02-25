@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { adminFetch } from "@/lib/adminApi";
+import { useAuth } from "../../../../context/AuthContext";
+import { adminFetch } from "../../../../lib/adminApi";
 
 type TenantDto = {
   id: string;

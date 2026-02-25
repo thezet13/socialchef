@@ -1,5 +1,5 @@
 // apps/web/src/features/presets/sanitize.ts
-import type { OverlayTextItem, OverlayPicItem, OverlayRectConfig, OverlayRectItem, OverlayRectFill } from "@/features/editor/editor.types"; 
+import type { OverlayTextItem, OverlayPicItem, OverlayRectConfig, OverlayRectItem, OverlayRectFill } from "../../features/editor/editor.types"; 
 
 export const ALIGN_VALUES = new Set([
   "top-left","top-center","top-right",

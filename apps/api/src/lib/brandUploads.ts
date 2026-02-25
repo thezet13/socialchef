@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { loadImage } from "@napi-rs/canvas";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
+import { UPLOADS_DIR_ABS } from "../lib/uploadsPaths";
 
 export type SavePngResult = {
   relativeUrl: string;

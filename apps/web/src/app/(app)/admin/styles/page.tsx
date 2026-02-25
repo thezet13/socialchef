@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { StyleCreateCard } from "@/features/styles/StyleCreateCard"; // <-- проверь путь
-import type { StyleListItem } from "@/features/styles/styles.types";
-import { apiFetch } from "@/lib/apiClient";
+import { useAuth } from "../../../../context/AuthContext";
+import { StyleCreateCard } from "../../../../features/styles/StyleCreateCard"; // <-- проверь путь
+import type { StyleListItem } from "../../../../features/styles/styles.types";
+import { apiFetch } from "../../../../lib/apiClient";
 
 type ListResp = { items: StyleListItem[] };
 

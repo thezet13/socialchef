@@ -2,7 +2,7 @@ import type {
   OverlayTextConfig,
   OverlayPicConfig,
   OverlayRectConfig,
-} from "@/features/editor/editor.types"; 
+} from "../../features/editor/editor.types"; 
 import { PresetFormat } from "./preset.editor.types";
 
 export interface PresetDto {

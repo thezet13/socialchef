@@ -2,7 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { apiFetch, ApiError } from "../lib/apiClient";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import { UpgradeModal } from "../components/UpgradeModal";
 
 export type MeDto = {
   user: {

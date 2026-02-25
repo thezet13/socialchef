@@ -2,12 +2,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Portal } from "@/lib/portal";
-import { getFormatById, PostFormatId } from "@/features/formats/postFormats";
+import { Portal } from "../lib/portal";
+import { getFormatById, PostFormatId } from "../features/formats/postFormats";
 import { getActionCostCredits, formatCredits } from "@socialchef/shared";
 import { Flame, X } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { apiFetch } from "@/lib/apiClient";
+import { useAuth } from "../context/AuthContext";
+import { apiFetch } from "../lib/apiClient";
 import { Spinner } from "./Spinner";
 
 type ComboLayout = "AUTO" | "ROW" | "GRID" | "HERO_SIDES";

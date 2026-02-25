@@ -1,6 +1,6 @@
 import path from "path";
 import fs from "fs";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
+import { UPLOADS_DIR_ABS } from "../../lib/uploadsPaths";
 import { StyleListItem } from "./styles.types";
 
 export function isLocalhostUrl(u: string) {

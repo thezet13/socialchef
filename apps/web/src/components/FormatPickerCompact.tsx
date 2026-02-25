@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { PostFormatId, PostFormatDef } from "@/features/formats/postFormats";
+import type { PostFormatId, PostFormatDef } from "../features/formats/postFormats";
 
 function ratioLabel(w: number, h: number): string {
   const r = w / h;

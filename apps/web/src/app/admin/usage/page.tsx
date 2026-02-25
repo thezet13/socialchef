@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { adminFetch } from "@/lib/adminApi";
-import { useAuth } from "@/context/AuthContext";
+import { adminFetch } from "../../../lib/adminApi";
+import { useAuth } from "../../../context/AuthContext";
 
 type Range = "24h" | "7d" | "30d";
 

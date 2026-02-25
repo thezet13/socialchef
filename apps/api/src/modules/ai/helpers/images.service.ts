@@ -1,7 +1,7 @@
 import path from "path";
 import fs from "fs";
 import fsp from "fs/promises";
-import { uploadsImagesDir, UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
+import { uploadsImagesDir, UPLOADS_DIR_ABS } from "../../../lib/uploadsPaths";
 
 export const EXPORT_CAP = 10;
 

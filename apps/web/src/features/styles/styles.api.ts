@@ -1,4 +1,4 @@
-import { readCookie } from "@/lib/apiClient";
+import { readCookie } from "../../lib/apiClient";
 
 export async function deleteStyle(opts: {
   apiBase: string;

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import type { ApplyPresetChoice, OverlayMode, ImageMode } from "@/components/ApplyPresetModal";
+import type { ApplyPresetChoice, OverlayMode, ImageMode } from "../../components/ApplyPresetModal";
 
 type Counts = { texts: number; pics: number; rects: number };
 

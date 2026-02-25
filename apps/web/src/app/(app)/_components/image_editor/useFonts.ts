@@ -1,9 +1,9 @@
 // apps/web/src/features/fonts/useFonts.ts
 import { useEffect, useMemo, useState } from "react";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch } from "../../../../lib/apiClient";
 import { PRO_FONT_FAMILIES, getAvailableWeights } from "@socialchef/pro-fonts";
-import type { OverlayTextItem } from "@/features/editor/editor.types";
-import { useAuth } from "@/context/AuthContext";
+import type { OverlayTextItem } from "../../../../features/editor/editor.types";
+import { useAuth } from "../../../../context/AuthContext";
 
 export type CustomFont = { family: string; url: string };
 type FontCaps = { bold: boolean; italic: boolean };

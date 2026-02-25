@@ -1,4 +1,4 @@
-import { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "@/features/editor/editor.types";
+import { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "../features/editor/editor.types";
 import { readCookie } from "./apiClient";
 
 type SwapOverlay = {

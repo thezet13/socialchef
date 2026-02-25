@@ -2,17 +2,16 @@ import path from "path";
 import fs from "fs";
 import { Router } from "express";
 import { PresetScope, PresetAccess, PresetStatus, ImageOrigin, Prisma } from "@prisma/client";
-import { prisma } from '@/lib/prisma';
-import { requireAuth } from '@/middleware/requireAuth';
-import { withTenant } from '@/middleware/withTenant';
+import { prisma } from '../../lib/prisma';
+import { requireAuth } from '../../middleware/requireAuth';
+import { withTenant } from '../../middleware/withTenant';
 import { applyPresetBodySchema, createBodySchema, listQuerySchema, patchBodySchema } from "./presets.types";
 import { SYSTEM_TENANT_ID } from "../../config/system";
 import { collectPresetUploadPaths, ensureUploadsImagesDir, extractRelativeUploadPath, extractUploadUrlsFromOverlay, getThumbSizeByRatio, isFileReferencedByOtherPresets, mergeOverlayJson, normalizeUploadsUrl, relUploadToAbs, remapOverlayIds, toDetailDto, toListDto } from "./presets.service";
 import { renderCompositeImage, renderOverlayOnlyImage } from "../ai/renderCompositeImage";
-import { ensureAssetForUploadsUrl, linkAssetToPreset } from "@/lib/assets";
+import { ensureAssetForUploadsUrl, linkAssetToPreset } from "../../lib/assets";
 import type { AssetKind } from "@prisma/client";
-import { uploadsUrlToAbsPath } from "@/lib/assets";
-//import fs from "fs/promises";
+import { uploadsUrlToAbsPath } from "../../lib/assets";
 
 export const presetsRouter = Router();
 

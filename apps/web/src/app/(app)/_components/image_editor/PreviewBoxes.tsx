@@ -5,8 +5,8 @@ import type {
   OverlayTextConfig,
   OverlayPicItem,
   OverlayRectConfig,
-} from "@/features/editor/editor.types";
-import { hexToRgba } from "@/lib/config";
+} from "../../../../features/editor/editor.types";
+import { hexToRgba } from "../../../../lib/config";
 
 export type OverlayPositionConfig = {
   align: string;

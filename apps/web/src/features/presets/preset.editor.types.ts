@@ -4,7 +4,7 @@ import type {
   OverlayTextItem,
   OverlayPicItem,
   OverlayRectItem
-} from "@/features/editor/editor.types";
+} from "../../features/editor/editor.types";
 
 export type PresetFormat = "1:1" | "2:3" | "3:2" | "4:5" | "5:4" | "9:16" | "16:9";
 

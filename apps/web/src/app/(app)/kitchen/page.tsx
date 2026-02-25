@@ -2,18 +2,18 @@
 
 import React from "react";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { readCookie, ApiError, apiFetch } from "@/lib/apiClient";
-import { getErrorMessage } from "@/lib/getErrorMessage";
-import { useT } from "@/i18n/LanguageProvider";
+import { useAuth } from "../../../context/AuthContext";
+import { readCookie, ApiError, apiFetch } from "../../../lib/apiClient";
+import { getErrorMessage } from "../../../lib/getErrorMessage";
+import { useT } from "../../../i18n/LanguageProvider";
 
-import { OverlayTextItem, OverlayPicItem, OverlayTextConfig, OverlayPicConfig, OverlayRectItem, OverlayRectConfig, OverlayRectFill, RenderOverlay, BakeLayer } from "@/features/editor/editor.types";
-import { hexToRgbaString, rgbaToAlpha, rgbaToHex } from "@/lib/config";
-import { toRelativeUploadPath } from "@/features/presets/useHydrateEditorFromPreset";
-import { PresetBuilderPanel } from "@/features/presets/builder/PresetBuilderPanel";
-import { POST_FORMATS, getFormatById, type PostFormatId, toPresetFormat, getExportSizeByFormatId } from "@/features/formats/postFormats";
-import { itemToOverlayCfg, picToOverlayCfg, rectToOverlayCfg } from "@/features/presets/toOverlay";
-import { buildPresetOverlay } from "@/features/presets/buildPresetOverlay";
+import { OverlayTextItem, OverlayPicItem, OverlayRectItem, OverlayRectFill, RenderOverlay, BakeLayer } from "../../../features/editor/editor.types";
+import { hexToRgbaString, rgbaToAlpha, rgbaToHex } from "../../../lib/config";
+import { toRelativeUploadPath } from "../../../features/presets/useHydrateEditorFromPreset";
+import { PresetBuilderPanel } from "../../../features/presets/builder/PresetBuilderPanel";
+import { POST_FORMATS, getFormatById, type PostFormatId, toPresetFormat, getExportSizeByFormatId } from "../../../features/formats/postFormats";
+import { itemToOverlayCfg, picToOverlayCfg, rectToOverlayCfg } from "../../../features/presets/toOverlay";
+import { buildPresetOverlay } from "../../../features/presets/buildPresetOverlay";
 import { Image as ImageIcon, Square, Trash as TrashIcon, Trash2, Type, X, RotateCcw, Upload, Flame, SendToBack, Save, SquareScissors } from "lucide-react";
 import { TextsPreviewBox, PicsPreviewBox, RectsPreviewBox } from "../_components/image_editor/PreviewBoxes";
 import { PresetsBlock } from "../_components/image_editor/PresetsBlock";
@@ -24,45 +24,45 @@ import { ImageAdjustmentsPanel, DEFAULT_IMAGE_ADJUSTMENTS, buildPreviewStyles, t
 import type { CustomFont } from "../_components/image_editor/useFonts";
 import {
   PREVIEW_WIDTH, TEXT_LIMIT_FREE, PIC_LIMIT_FREE, RECT_LIMIT_FREE,
-  BaseTransform, GenKind, Layer, ActiveLayer, GeneratedImage, ImagesResponse, ProDesignDTO,
-} from "@/features/editor/editor.constants";
-import { Section, Label, Num } from "@/components/uiHelpers"
+  BaseTransform, GenKind, Layer, ActiveLayer, GeneratedImage, ProDesignDTO,
+} from "../../../features/editor/editor.constants";
+import { Section, Label, Num } from "../../../components/uiHelpers"
 import { makeDefaultRect, makeDefaultText } from "../_components/image_editor/addConsts";
-import { buildHttpErrorMessage, validateImageFile } from "@/components/errorsHelpers";
-import { Portal } from "@/lib/portal";
+import { buildHttpErrorMessage, validateImageFile } from "../../../components/errorsHelpers";
+import { Portal } from "../../../lib/portal";
 
-import { FormatPickerCompact } from "@/components/FormatPickerCompact";
-import { StylePreviewModal } from "@/components/StylePreviewModal";
-import { commitPreviewToBase } from "@/lib/commitPreviewToBase";
+import { FormatPickerCompact } from "../../../components/FormatPickerCompact";
+import { StylePreviewModal } from "../../../components/StylePreviewModal";
+import { commitPreviewToBase } from "../../../lib/commitPreviewToBase";
 
-import { StylePickerGrid } from "@/components/StylePickerGrid";
-import type { StyleListItem, ListStylesResponse } from "@/features/styles/styles.types";
-import { createUserStyleFromImage } from "@/features/styles/createUserStyleFromImage";
-import { deleteStyle } from "@/features/styles/styles.api";
-import { Spinner } from "@/components/Spinner";
+import { StylePickerGrid } from "../../../components/StylePickerGrid";
+import type { StyleListItem, ListStylesResponse } from "../../../features/styles/styles.types";
+import { createUserStyleFromImage } from "../../../features/styles/createUserStyleFromImage";
+import { deleteStyle } from "../../../features/styles/styles.api";
+import { Spinner } from "../../../components/Spinner";
 
-import { parseBaseTransform } from "@/features/editor/baseTransform";
-import { parseImageAdjustments } from "@/features/editor/imageAdjustments";
+import { parseBaseTransform } from "../../../features/editor/baseTransform";
+import { parseImageAdjustments } from "../../../features/editor/imageAdjustments";
 
-import { useCapabilities } from "@/features/auth/useCapabilities";
+import { useCapabilities } from "../../../features/auth/useCapabilities";
 import { getActionCostCredits, formatCredits } from "@socialchef/shared";
-import { applyCreditsFromResponse } from "@/lib/applyCreditsFromResponse";
-import { AppliedPresetDesign, EditorPreset } from "@/features/presets/preset.editor.types";
+import { applyCreditsFromResponse } from "../../../lib/applyCreditsFromResponse";
+import { AppliedPresetDesign, EditorPreset } from "../../../features/presets/preset.editor.types";
 
-import { BaseSource } from "@/components/BaseImageChooserModal";
-import { buildEditorStateFromRenderOverlay } from "@/features/presets/hydrateEditorFromPreset";
+import { BaseSource } from "../../../components/BaseImageChooserModal";
+import { buildEditorStateFromRenderOverlay } from "../../../features/presets/hydrateEditorFromPreset";
 
-import { uploadBrandStyleImage, analyzeBrandStyle, createBrandStyle, listBrandStyles, deleteBrandStyle } from "@/features/brandStyles/brandStyles.api";
-import { BrandStylePickerGrid } from "@/components/BrandStylePickerGrid";
+import { uploadBrandStyleImage, analyzeBrandStyle, createBrandStyle, listBrandStyles, deleteBrandStyle } from "../../../features/brandStyles/brandStyles.api";
+import { BrandStylePickerGrid } from "../../../components/BrandStylePickerGrid";
 
-import { BakeBrandStyleModal } from "@/components/BakeBrandStyleModal";
-import type { BrandStyleListItem } from "@/features/brandStyles/brandStyles.types";
-import { useGlobalDialog } from "@/components/GlobalDialogProvider";
+import { BakeBrandStyleModal } from "../../../components/BakeBrandStyleModal";
+import type { BrandStyleListItem } from "../../../features/brandStyles/brandStyles.types";
+import { useGlobalDialog } from "../../../components/GlobalDialogProvider";
 
-import { ApplyPresetModal } from "@/components/ApplyPresetModal";
-import { useApplyPresetFlow } from "@/features/presets/useApplyPresetFlow";
+import { ApplyPresetModal } from "../../../components/ApplyPresetModal";
+import { useApplyPresetFlow } from "../../../features/presets/useApplyPresetFlow";
 
-import { ComboPreviewModal } from "@/components/ComboPreviewModal";
+import { ComboPreviewModal } from "../../../components/ComboPreviewModal";
 
 
 const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001";

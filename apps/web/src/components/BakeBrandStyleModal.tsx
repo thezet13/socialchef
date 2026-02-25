@@ -1,21 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Portal } from "@/lib/portal";
+import { Portal } from "../lib/portal";
 import { X, Flame } from "lucide-react";
 import type { BakeBehavior } from "./bakeBrandStyle.behavior";
 import { getActionCostCredits, formatCredits } from "@socialchef/shared";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 
 import type {
     OverlayTextItem,
     OverlayPicItem,
     OverlayRectItem
-} from "@/features/editor/editor.types";
+} from "../features/editor/editor.types";
 
 // подстрой под свой apiFetch, если у тебя он в другом месте
-import { apiFetch } from "@/lib/apiClient";
-import { getFormatById, PostFormatId } from "@/features/formats/postFormats";
+import { apiFetch } from "../lib/apiClient";
+import { getFormatById, PostFormatId } from "../features/formats/postFormats";
 import { Spinner } from "./Spinner";
 
 type OverlaySnapshot = {

@@ -1,29 +1,27 @@
 import { Router } from "express";
 import { z } from "zod";
-import { openai } from '@/lib/openai';
+import { openai } from '../../lib/openai';
 
-import { requireAuth } from "@/middleware/requireAuth";
-import { withTenant } from "@/middleware/withTenant";
+import { requireAuth } from "../../middleware/requireAuth";
+import { withTenant } from "../../middleware/withTenant";
 
-import { prisma } from "@/lib/prisma";
+import { prisma } from "../../lib/prisma";
 import { StyleScope, StyleStatus } from "@prisma/client";
 import fs from "fs";
 import path from "path";
 import { createCanvas, loadImage } from '@napi-rs/canvas';
-import { ensureDir, uploadStyleImage } from "@/lib/uploads";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
-import { ensureCreditsOrThrow, PaywallError } from "@/modules/billing/credits.guard";
+import { ensureDir, uploadStyleImage } from "../../lib/uploads";
+import { UPLOADS_DIR_ABS } from "../../lib/uploadsPaths";
+import { ensureCreditsOrThrow, PaywallError } from "../../modules/billing/credits.guard";
 
 import {
     type AnalyzeStyleBody,
     type AnalyzeStyleResponse,
     type CreateStyleBody,
     type CreateStyleResponse,
-    type ListStylesResponse,
 
     createBodySchema,
     analyzeBodySchema,
-    listQuerySchema,
     listQueryLoadSchema,
 
 
@@ -39,7 +37,7 @@ import {
 
 
 } from "./styles.service";
-import { drawCover } from "@/lib/drawCover";
+import { drawCover } from "../../lib/drawCover";
 
 export const stylesRouter = Router();
 

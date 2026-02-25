@@ -1,7 +1,7 @@
-import type { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "@/features/editor/editor.types"; 
-import type { OverlayTextItem, OverlayPicItem, OverlayRectItem } from "@/features/editor/editor.types";
+import type { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "../../features/editor/editor.types"; 
+import type { OverlayTextItem, OverlayPicItem, OverlayRectItem } from "../../features/editor/editor.types";
 
-import { itemToOverlayCfg, picToOverlayCfg, rectToOverlayCfg } from "@/features/presets/toOverlay";
+import { itemToOverlayCfg, picToOverlayCfg, rectToOverlayCfg } from "../../features/presets/toOverlay";
 
 
 export type PresetOverlay = {

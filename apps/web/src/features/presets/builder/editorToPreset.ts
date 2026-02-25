@@ -2,9 +2,9 @@ import type {
   OverlayTextItem,
   OverlayPicItem,
   OverlayRectItem, // rects
-} from "@/features/editor/editor.types";
+} from "../../../features/editor/editor.types";
 
-import type { EditorPreset } from "@/features/presets/preset.editor.types";
+import type { EditorPreset } from "../../../features/presets/preset.editor.types";
 
 // В v1 мы просто берем поля 1-в-1 (как есть в editor state).
 // Позже можно будет чистить/минимизировать JSON.

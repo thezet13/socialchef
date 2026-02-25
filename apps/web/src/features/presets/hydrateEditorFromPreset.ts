@@ -1,6 +1,6 @@
-import type { RenderOverlay, OverlayTextItem, OverlayPicItem, OverlayRectItem } from "@/features/editor/editor.types";
+import type { RenderOverlay, OverlayTextItem, OverlayPicItem, OverlayRectItem } from "../../features/editor/editor.types";
 import { presetTextToItem, type PresetTextRaw, presetPicToItem, type PresetPicRaw, presetRectToItem, type PresetRectRaw } from "./sanitize";
-import type { EditorPreset } from "@/features/presets/preset.editor.types";
+import type { EditorPreset } from "../../features/presets/preset.editor.types";
 
 
 // Тут можно расширить позже: pics, rects, logos и т.д.

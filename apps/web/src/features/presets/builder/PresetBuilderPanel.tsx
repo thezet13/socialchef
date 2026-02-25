@@ -8,15 +8,15 @@ import type {
   OverlayTextConfig,
   OverlayPicConfig,
   OverlayRectConfig,
-} from "@/features/editor/editor.types";
+} from "../../../features/editor/editor.types";
 
-import type { BaseTransform } from "@/features/editor/editor.constants";
-import type { ImageAdjustments } from "@/app/(app)/_components/image_editor/ImageAdjustmentsPanel";
+import type { BaseTransform } from "../../../features/editor/editor.constants";
+import type { ImageAdjustments } from "../../../app/(app)/_components/image_editor/ImageAdjustmentsPanel";
 
-import { toRelativeUploadPath } from "@/features/presets/useHydrateEditorFromPreset";
-import { buildPresetOverlay } from "@/features/presets/buildPresetOverlay";
-import { toPresetFormat, type PostFormatId } from "@/features/formats/postFormats";
-import { useAuth } from "@/context/AuthContext";
+import { toRelativeUploadPath } from "../../../features/presets/useHydrateEditorFromPreset";
+import { buildPresetOverlay } from "../../../features/presets/buildPresetOverlay";
+import { toPresetFormat, type PostFormatId } from "../../../features/formats/postFormats";
+import { useAuth } from "../../../context/AuthContext";
 
 type PresetAccess = "FREE" | "EDITOR" | "PRO" | "PRO_PLUS";
 type PresetStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED";

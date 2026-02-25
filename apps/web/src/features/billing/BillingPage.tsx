@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useGlobalDialog } from "@/components/GlobalDialogProvider";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useGlobalDialog } from "../../components/GlobalDialogProvider";
 
-import PlansPicker, { Interval, PaidPlan } from "@/components/PlansPicker";
+import PlansPicker, { Interval, PaidPlan } from "../../components/PlansPicker";
 
 type Plan = "FREE" | "PRO" | "PRO_PLUS";
 

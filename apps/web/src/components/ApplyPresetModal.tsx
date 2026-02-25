@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-// ✅ Поставь правильный путь к твоему Portal
-import { Portal } from "@/lib/portal";
+import { Portal } from "../lib/portal";
 
 export type OverlayMode = "REPLACE" | "MERGE";
 export type ImageMode = "KEEP" | "REPLACE";

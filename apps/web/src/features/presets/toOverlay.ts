@@ -1,5 +1,5 @@
-import type { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "@/features/editor/editor.types"; 
-import type { OverlayTextItem, OverlayPicItem, OverlayRectItem } from "@/features/editor/editor.types";
+import type { OverlayTextConfig, OverlayPicConfig, OverlayRectConfig } from "../../features/editor/editor.types"; 
+import type { OverlayTextItem, OverlayPicItem, OverlayRectItem } from "../../features/editor/editor.types";
 
 
 export function itemToOverlayCfg(it: OverlayTextItem): OverlayTextConfig {

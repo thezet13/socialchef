@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
-import { adminFetch } from "@/lib/adminApi";
+import { adminFetch } from "../../../../../lib/adminApi";
 
 type UsageEventRow = {
   id: string;

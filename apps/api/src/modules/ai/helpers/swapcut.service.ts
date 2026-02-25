@@ -1,7 +1,3 @@
-import path from "path";
-import fs from "fs";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
-import { readAsPngBuffer } from "./images.service";
 import { createCanvas, loadImage, Image } from '@napi-rs/canvas';
 
 export async function generateDishMaskCutout({

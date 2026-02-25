@@ -1,4 +1,4 @@
-import type { StyleBehavior } from "@/components/stylePreview.behavior";
+import type { StyleBehavior } from "../components/stylePreview.behavior";
 import { readCookie } from "./apiClient";
 // apps/web/src/lib/api/restyleWithGpt15.ts
 // Frontend helper for: POST /ai/pro-images/restyle-gpt15

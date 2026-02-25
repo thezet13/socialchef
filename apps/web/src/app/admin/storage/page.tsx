@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { adminFetch } from "@/lib/adminApi";
+import { adminFetch } from "../../../lib/adminApi";
 
 type Overview = {
   activeCount: number;

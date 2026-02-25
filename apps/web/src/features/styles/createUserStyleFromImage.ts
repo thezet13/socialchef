@@ -1,4 +1,4 @@
-import { readCookie } from "@/lib/apiClient";
+import { readCookie } from "../../lib/apiClient";
 
 type UploadResp = {
   imageUrl: string;

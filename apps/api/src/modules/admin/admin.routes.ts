@@ -9,7 +9,7 @@ import { adminAuditLog } from "./admin.audit";
 import { PlanType, SubscriptionStatus } from "@prisma/client";
 import { getEffectivePlan } from "../billing/billing.service";
 import { runRetention } from "../../jobs/retention";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
+import { UPLOADS_DIR_ABS } from "../../lib/uploadsPaths";
 
 export const adminRouter = Router();
 

@@ -1,4 +1,4 @@
-import { apiFetch, readCookie } from "@/lib/apiClient";
+import { apiFetch, readCookie } from "../../lib/apiClient";
 
 // Если у тебя типы лежат в web-слое — импортируй оттуда.
 // Если типы сейчас только в api-модуле — можно временно продублировать DTO прямо тут.

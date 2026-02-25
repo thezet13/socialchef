@@ -4,13 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ReactNode, useState, useEffect, useRef, useMemo } from "react";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { UserBadge } from "@/components/UserBadge";
-import { Portal } from "@/lib/portal";
+import { useAuth } from "../../../context/AuthContext";
+import { UserBadge } from "../../../components/UserBadge";
+import { Portal } from "../../../lib/portal";
 import Image from "next/image";
 import { Globe } from "lucide-react";
-import { useI18n } from "@/i18n/LanguageProvider";
-import type { Lang } from "@/i18n/i18n";
+import { useI18n } from "../../../i18n/LanguageProvider";
+import type { Lang } from "../../../i18n/i18n";
 
 
 export default function AppShell({ children }: { children: ReactNode }) {

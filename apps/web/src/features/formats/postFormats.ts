@@ -1,4 +1,4 @@
-import type { PresetFormat } from "@/features/presets/preset.editor.types";
+import type { PresetFormat } from "../../features/presets/preset.editor.types";
 
 export type PostFormatId =
   | "1_1"

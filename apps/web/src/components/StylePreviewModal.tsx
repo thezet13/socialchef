@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { restyleWithGpt15 } from "@/lib/restyleWithGpt15";
-import { getFormatById, PostFormatId } from "@/features/formats/postFormats";
-import { Portal } from "@/lib/portal";
+import { restyleWithGpt15 } from "../lib/restyleWithGpt15";
+import { getFormatById, PostFormatId } from "../features/formats/postFormats";
+import { Portal } from "../lib/portal";
 import { getActionCostCredits, formatCredits } from "@socialchef/shared";
 import { Flame, X } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
 import { StyleBehavior } from "./stylePreview.behavior";
 import { Spinner } from "./Spinner";
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch } from "../lib/apiClient";
 
 type Props = {
     open: boolean;

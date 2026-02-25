@@ -6,10 +6,10 @@ import {
   deletePreset,
   renderPresetThumbnail,
   type PresetListItemDto,
-} from "@/features/presets/presets.api";
-import type { EditorPreset } from "@/features/presets/preset.editor.types";
-import { getErrorMessage } from "@/lib/getErrorMessage";
-import { useAuth } from "@/context/AuthContext";
+} from "../../../../features/presets/presets.api";
+import type { EditorPreset } from "../../../../features/presets/preset.editor.types";
+import { getErrorMessage } from "../../../../lib/getErrorMessage";
+import { useAuth } from "../../../../context/AuthContext";
 
 type PresetsHook = {
   presets: PresetListItemDto[];

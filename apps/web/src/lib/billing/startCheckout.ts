@@ -1,9 +1,9 @@
 "use client";
 
-import type { PaidPlan, Interval, TopUpPack } from "@/lib/billing/prices";
+import type { PaidPlan, Interval, TopUpPack } from "../../lib/billing/prices";
 // позже этот импорт будет реальным:
-// import { openPaddleCheckout } from "@/lib/paddle/paddleClient";
-// import { getSubscriptionPriceId, getTopupPriceId } from "@/lib/paddle/prices";
+// import { openPaddleCheckout } from "../../lib/paddle/paddleClient";
+// import { getSubscriptionPriceId, getTopupPriceId } from "../../lib/paddle/prices";
 
 export async function startSubscriptionCheckout(params: {
   enabled: boolean;

@@ -1,4 +1,4 @@
-import type { OverlayAlign, OverlayPosition } from "@/features/editor/editor.types";
+import type { OverlayAlign, OverlayPosition } from "../../features/editor/editor.types";
 
 export type AlignValue = OverlayAlign;
 

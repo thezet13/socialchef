@@ -1,8 +1,14 @@
-import { apiFetch } from "@/lib/apiClient";
+import { apiFetch } from "../lib/apiClient";
+import type { HttpMethod } from "../lib/apiClient";
 
-export function adminFetch<T>(path: string, init?: { method?: string; body?: unknown }) {
+type AdminFetchInit = {
+  method?: HttpMethod;
+  body?: unknown;
+};
+
+export function adminFetch<T>(path: string, init?: AdminFetchInit) {
   return apiFetch<T>(`/admin${path}`, {
-    method: (init?.method as any) ?? "GET",
+    method: init?.method ?? "GET",
     body: init?.body,
   });
 }

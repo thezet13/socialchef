@@ -4,11 +4,11 @@ import type {
   OverlayTextItem,
   OverlayPicItem,
   OverlayRectItem,
-} from "@/features/editor/editor.types";
-import { buildEditorStateFromPreset } from "@/features/presets/hydrateEditorFromPreset";
-import type { EditorPreset } from "@/features/presets/preset.editor.types";
-import { BaseTransform } from "@/features/editor/baseTransform";
-import { DEFAULT_IMAGE_ADJUSTMENTS, ImageAdjustments } from "@/app/(app)/_components/image_editor/ImageAdjustmentsPanel";
+} from "../../features/editor/editor.types";
+import { buildEditorStateFromPreset } from "../../features/presets/hydrateEditorFromPreset";
+import type { EditorPreset } from "../../features/presets/preset.editor.types";
+import { BaseTransform } from "../../features/editor/baseTransform";
+import { DEFAULT_IMAGE_ADJUSTMENTS, ImageAdjustments } from "../../app/(app)/_components/image_editor/ImageAdjustmentsPanel";
 
 export type ActiveLayer =
   | { kind: "text"; id: string }

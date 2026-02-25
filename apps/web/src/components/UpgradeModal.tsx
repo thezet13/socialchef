@@ -3,7 +3,7 @@
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PlansPicker, { Plan } from "./PlansPicker";
-import { useAuth } from "@/context/AuthContext"; 
+import { useAuth } from "../context/AuthContext"; 
 
 type PaywallPayload = {
   code?: "INSUFFICIENT_CREDITS" | "UPGRADE_REQUIRED";

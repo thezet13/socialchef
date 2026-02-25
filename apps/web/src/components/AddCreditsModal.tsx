@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { apiFetch } from "@/lib/apiClient";
-import { getErrorMessage } from "@/lib/getErrorMessage";
-import { useGlobalDialog } from "@/components/GlobalDialogProvider";
-import { useAuth } from "@/context/AuthContext";
+import { apiFetch } from "../lib/apiClient";
+import { getErrorMessage } from "../lib/getErrorMessage";
+import { useGlobalDialog } from "../components/GlobalDialogProvider";
+import { useAuth } from "../context/AuthContext";
 
 type PaymentMethod = {
   id: string;

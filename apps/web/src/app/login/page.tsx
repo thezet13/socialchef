@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { getErrorMessage } from "@/lib/getErrorMessage";
-import { apiFetch } from "@/lib/apiClient";
+import { useAuth } from "../../context/AuthContext";
+import { getErrorMessage } from "../../lib/getErrorMessage";
+import { apiFetch } from "../../lib/apiClient";
 
 type MeResponse = {
   user?: {

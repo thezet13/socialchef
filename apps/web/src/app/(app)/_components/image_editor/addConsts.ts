@@ -1,5 +1,5 @@
 // app/(app)/_components/image_editor/addConsts.ts
-import type { OverlayRectItem, OverlayTextItem } from "@/features/editor/editor.types";
+import type { OverlayRectItem, OverlayTextItem } from "../../../../features/editor/editor.types";
 
 /**
  * Генерация ID (на случай если где-то crypto недоступен)

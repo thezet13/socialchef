@@ -1,5 +1,3 @@
-import { useAuth } from "@/context/AuthContext";
-
 export function applyCreditsFromResponse(
   r: unknown,
   setCreditsBalance: (n: number) => void

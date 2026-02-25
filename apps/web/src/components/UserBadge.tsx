@@ -1,8 +1,7 @@
 "use client";
 
-import * as React from "react";
-import { useAuth } from "@/context/AuthContext";
-import { useCapabilities } from "@/features/auth/useCapabilities";
+import { useAuth } from "../context/AuthContext";
+import { useCapabilities } from "../features/auth/useCapabilities";
 import { Flame } from "lucide-react";
 
 export function UserBadge() {

@@ -1,5 +1,5 @@
-import en from "@/i18n/lang/en.json";
-import ru from "@/i18n/lang/ru.json";
+import en from "../i18n/lang/en.json";
+import ru from "../i18n/lang/ru.json";
 
 export const LANG_STORAGE_KEY = "sc_lang" as const;
 

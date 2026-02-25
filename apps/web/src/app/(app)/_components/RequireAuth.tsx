@@ -1,9 +1,9 @@
 "use client";
 
 import { ReactNode, useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "../../../context/AuthContext";
 import { usePathname, useRouter } from "next/navigation";
-import { Spinner } from "@/components/Spinner";
+import { Spinner } from "../../../components/Spinner";
 import Image from "next/image";
 
 export default function RequireAuth({ children }: { children: ReactNode }) {

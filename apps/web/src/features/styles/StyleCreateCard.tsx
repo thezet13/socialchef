@@ -1,8 +1,8 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import { readCookie } from "@/lib/apiClient";
-import { applyCreditsFromResponse } from "@/lib/applyCreditsFromResponse";
+import { useAuth } from "../../context/AuthContext";
+import { readCookie } from "../../lib/apiClient";
+import { applyCreditsFromResponse } from "../../lib/applyCreditsFromResponse";
 import React, { useMemo, useState } from "react";
 
 type Props = {

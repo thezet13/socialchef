@@ -1,5 +1,5 @@
-import { apiFetch } from "@/lib/apiClient";
-import type { AppliedPresetDesign, EditorPreset } from "@/features/presets/preset.editor.types";
+import { apiFetch } from "../../lib/apiClient";
+import type { AppliedPresetDesign, EditorPreset } from "../../features/presets/preset.editor.types";
 
 export type PresetScope = "SYSTEM" | "TENANT";
 
