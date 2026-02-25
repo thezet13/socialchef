@@ -1,7 +1,6 @@
 {
   "name": "socialchef-api",
   "version": "1.0.0",
-  "type": "commonjs",
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
