@@ -14,7 +14,6 @@ import { withTenant } from '../../middleware/withTenant';
 import { openai } from '../../lib/openai';
 import { resolveCurrentPeriodForTenant, getMaxExportPxForPlan } from "../../modules/ai/ai.usage";
 
-import { ImageAdjustments, renderCompositeImage } from "./renderCompositeImage";
 import { getTenantPlan } from "./helpers/getTenantPlan";
 import { assertLibraryQuota } from "../assets/libraryQuota";
 import { UPLOADS_DIR_ABS, uploadsImagesDir } from "../../lib/uploadsPaths";

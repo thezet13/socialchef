@@ -4,7 +4,7 @@ import { OverlayPicConfig, OverlayRectConfig, OverlayTextConfig } from "../types
 import { drawImageCover, drawImageContain } from '../ai.render';
 import { fileFromPng, loadUploadsAnyAsPng } from './images.service';
 import { resolveAiEditSize } from './ai.service';
-import { openai } from '@/lib/openai';
+import { openai } from '../../../lib/openai';
 
 type BakeLayer = "FRONT" | "BAKED";
 
