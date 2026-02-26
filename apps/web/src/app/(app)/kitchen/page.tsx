@@ -36,7 +36,7 @@ import { StylePreviewModal } from "../../../components/StylePreviewModal";
 import { commitPreviewToBase } from "../../../lib/commitPreviewToBase";
 
 import { StylePickerGrid } from "../../../components/StylePickerGrid";
-import type { StyleListItem, ListStylesResponse } from "../../../features/styles/styles.types";
+import type { StyleListItem } from "../../../features/styles/styles.types";
 import { createUserStyleFromImage } from "../../../features/styles/createUserStyleFromImage";
 import { deleteStyle } from "../../../features/styles/styles.api";
 import { Spinner } from "../../../components/Spinner";
@@ -65,7 +65,10 @@ import { useApplyPresetFlow } from "../../../features/presets/useApplyPresetFlow
 import { ComboPreviewModal } from "../../../components/ComboPreviewModal";
 
 
-const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001";
+const apiBase =
+  process.env.NODE_ENV === "development"
+    ? (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001")
+    : "/api";
 
 function toAbsUrl(apiBase: string, url?: string | null) {
   if (!url) return null;
