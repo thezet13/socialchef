@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:4001";
-
+//const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:4001";
+ const API_BASE =
+   process.env.NODE_ENV === "development"
+     ? (process.env.NEXT_PUBLIC_API_URL ?? "https://app.socialchef.net")
+     : "/api";
+    
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,

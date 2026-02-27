@@ -18,15 +18,28 @@ import { brandStylesRouter } from './modules/brand-styles/brandStyles.routes';
 export function createServer() {
   const app = express();
 
-  app.use(cors({
-    origin: process.env.WEB_ORIGIN ?? "http://127.0.0.1:3000",
-    credentials: true,
-  }));
+  const allowlist = new Set([
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:4000",
+    "http://127.0.0.1:4001",
+    "http://localhost:3000",
+    "https://app.socialchef.net",
+  ]);
 
-  app.use(cookieParser());   
+  app.use(
+    cors({
+      origin(origin, cb) {
+        if (!origin) return cb(null, true); // curl/postman
+        cb(null, allowlist.has(origin));
+      },
+      credentials: true,
+    })
+  );
+
+  app.use(cookieParser());
   app.use(express.json());
 
-  app.use(requireCsrf);        
+  app.use(requireCsrf);
 
   app.get('/health', (req, res) => {
     res.json({ ok: true, service: 'socialchef-api' });
@@ -34,7 +47,7 @@ export function createServer() {
 
   app.get('/users', async (req, res) => {
     const users = await prisma.user.findMany();
-    res.json(users); 
+    res.json(users);
   });
 
   app.use("/admin", adminRouter);
