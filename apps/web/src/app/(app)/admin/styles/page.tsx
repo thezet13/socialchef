@@ -9,7 +9,7 @@ import { apiFetch } from "../../../../lib/apiClient";
 type ListResp = { items: StyleListItem[] };
 
 export default function AdminStylesPage() {
-  const { user, me } = useAuth();
+  const { user } = useAuth();
   const authed = !!user;
 
   // если у тебя apiBase хранится иначе — подставь как в images/page.tsx
