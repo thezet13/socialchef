@@ -16,7 +16,7 @@
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
-    "express": "^4.19.0",
+    "express": "^4.22.1",
     "flubber": "^0.4.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.0.2",
@@ -25,13 +25,13 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
-    "@types/node": "^20",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
+    "@types/node": "^20",
     "prisma": "^6.19.0",
     "ts-node-dev": "^2.0.0",
     "tsx": "^4.21.0",
