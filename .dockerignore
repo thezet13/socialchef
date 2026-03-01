@@ -1,0 +1,38 @@
+# Git
+.git
+**/.git
+
+# Node
+node_modules
+**/node_modules
+
+# Next.js
+.next
+**/.next
+
+# Build outputs
+dist
+**/dist
+build
+**/build
+
+# Turbo
+.turbo
+**/.turbo
+
+# Coverage
+coverage
+**/coverage
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env (не надо пихать в образ)
+.env
+.env.*
