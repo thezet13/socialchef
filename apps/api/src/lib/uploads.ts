@@ -185,25 +185,3 @@ export const uploadPic = multer({
     cb(null, true);
   },
 });
-
-// import path from "path";
-// import fs from "fs/promises";
-
-// export function isUploadPath(p: string) {
-//   return typeof p === "string" && p.startsWith("/uploads/");
-// }
-
-// export function uploadRelToAbs(rel: string) {
-//   return path.join(process.cwd(), rel.replace(/^\//, ""));
-// }
-
-// export async function safeUnlinkUpload(rel: string) {
-//   if (!isUploadPath(rel)) return { ok: false as const, reason: "not_upload_path" };
-//   try {
-//     await fs.unlink(uploadRelToAbs(rel));
-//     return { ok: true as const };
-//   } catch (e: any) {
-//     if (e?.code === "ENOENT") return { ok: true as const }; // уже нет — норм
-//     return { ok: false as const, reason: e?.message ?? String(e) };
-//   }
-// }

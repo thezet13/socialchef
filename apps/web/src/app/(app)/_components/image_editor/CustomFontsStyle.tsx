@@ -5,7 +5,6 @@ import type { CustomFont } from "./useFonts";
 
 export function CustomFontsStyle({
   customFonts,
-  apiBase,
 }: {
   customFonts: CustomFont[];
   apiBase: string;
@@ -20,7 +19,7 @@ export function CustomFontsStyle({
             (f) => `
 @font-face {
   font-family: '${f.family}';
-  src: url('${apiBase}${f.url}') format('truetype');
+  src: url('${f.url}') format('truetype');
   font-weight: 100 900;
   font-style: normal;
 }

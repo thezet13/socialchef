@@ -103,7 +103,7 @@ export function useHydrateEditorFromPreset(args: UseHydrateEditorFromPresetArgs)
 
       const base = (p.baseImageUrl ?? "").trim();
       if (base) {
-        const fullPresetBaseUrl = base.startsWith("http") ? base : `${apiBase}${base}`;
+        const fullPresetBaseUrl = base.startsWith("http") ? base : base;
         setPresetBaseImageUrl(fullPresetBaseUrl);
       } else {
         setPresetBaseImageUrl(null);
@@ -155,14 +155,23 @@ export function toRelativeUploadPath(url: string, apiBase: string) {
   const u = url.trim();
   if (!u) return u;
 
-  // уже относительный
+  // уже ок
   if (u.startsWith("/uploads/")) return u;
 
-  // absolute -> relative
-  if (u.startsWith(apiBase + "/uploads/")) {
-    return u.slice(apiBase.length);
+  // "/api/uploads/..." => "/uploads/..."
+  if (u.startsWith(apiBase + "/uploads/")) return u.slice(apiBase.length);
+
+  // абсолютный URL => берём pathname
+  if (u.startsWith("http://") || u.startsWith("https://")) {
+    try {
+      const p = new URL(u).pathname; // например "/uploads/images/..."
+      if (p.startsWith("/api/uploads/")) return p.replace("/api", "");
+      if (p.startsWith("/uploads/")) return p;
+      return u; // внешний URL
+    } catch {
+      return u;
+    }
   }
 
-  // внешний URL или что-то нестандартное — оставляем как есть
   return u;
 }

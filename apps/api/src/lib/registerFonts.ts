@@ -60,8 +60,5 @@ export function ensureFontsRegistered(): void {
     okCount++;
   }
 
-  console.log("[fonts] registered files:", okCount, "missing:", missCount);
-  console.log("[fonts] families visible to canvas:", GlobalFonts.families);
-
   done = true;
 }

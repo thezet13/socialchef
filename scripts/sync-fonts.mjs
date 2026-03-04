@@ -25,7 +25,3 @@ if (!fs.existsSync(src)) {
 
 copyDir(src, webDst);
 copyDir(src, apiDst);
-
-console.log("✅ Fonts synced:");
-console.log("  ->", webDst);
-console.log("  ->", apiDst);

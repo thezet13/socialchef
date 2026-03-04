@@ -1,9 +1,11 @@
 // apps/web/src/lib/apiClient.ts
 //const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001";
- const API_URL =
-   process.env.NODE_ENV === "development"
-     ? (process.env.NEXT_PUBLIC_API_URL ?? "https://app.socialchef.net")
-     : "/api";
+//  const API_URL =
+//    process.env.NODE_ENV === "development"
+//      ? (process.env.NEXT_PUBLIC_API_URL ?? "https://app.socialchef.net")
+//      : "/api";
+
+const API_URL = "/api";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 

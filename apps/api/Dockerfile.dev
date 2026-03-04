@@ -1,0 +1,16 @@
+FROM node:20-bookworm-slim
+WORKDIR /app
+RUN corepack enable
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+# важное: pnpm должен видеть workspace manifests
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages ./packages
+
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/apps/api
+EXPOSE 4000
+CMD ["pnpm","dev"]

@@ -55,14 +55,28 @@ export function itemToOverlayCfg(it: OverlayTextItem): OverlayTextConfig {
   };
 }
 
-export function picToOverlayCfg(l: OverlayPicItem, apiBase: string): OverlayPicConfig {
+function normalizePublicUrl(u: string) {
+  if (!u) return u;
+
+  // если вдруг пришло "/api/uploads/..." — исправим
+  if (u.startsWith("/api/uploads/")) return u.replace("/api", "");
+
+  // если абсолютный URL — оставляем
+  if (u.startsWith("http://") || u.startsWith("https://")) return u;
+
+  // гарантируем leading slash
+  return u.startsWith("/") ? u : `/${u}`;
+}
+
+export function picToOverlayCfg(l: OverlayPicItem): OverlayPicConfig {
+  const url = normalizePublicUrl(l.url);
   return {
     id: l.id,
     name: l.name,
     role: l.role,
     
     visible: l.visible !== false,
-    url: l.url.startsWith(apiBase) ? l.url.replace(apiBase, "") : l.url,
+    url,
     z: Number(l.z ?? (l.alwaysOnTop ? 100 : 10)),
     width: l.width,
     height: l.height,

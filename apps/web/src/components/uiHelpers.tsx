@@ -38,8 +38,8 @@ export function Section({
   return (
     <div className={`
         border border-slate-800 bg-slate-950/30
-        ${roundedTop ? "rounded-t-2xl" : ""}
-        ${roundedBottom ? "rounded-b-2xl" : ""}
+        ${roundedTop ? "rounded-t-xl" : ""}
+        ${roundedBottom ? "rounded-b-xl" : ""}
         ${borderBottom ? "" : "border-b-0"}
       `}>
       {/* HEADER */}

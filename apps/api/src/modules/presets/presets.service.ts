@@ -4,6 +4,7 @@ import fs from "fs";
 import { type ImageAdjustments } from "../ai/renderCompositeImage";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
+import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
 
 export function toListDto(p: any): PresetListDto {
   return {
@@ -108,17 +109,19 @@ export function extractRelativeUploadPath(urlOrPath: string): string | null {
   const idx = s.indexOf("/uploads/");
   if (idx === -1) return null;
 
-  const rel = s.slice(idx); // "/uploads/...."
+  const rel = s.slice(idx).replace(/^\/api/, "");
   if (rel.includes("..")) return null;
   return rel;
 }
 
 export function relUploadToAbs(rel: string) {
-  return path.join(process.cwd(), rel.replace(/^\//, "")); // "uploads/images/xxx.png"
+  // rel like "/uploads/images/x.png"
+  const sub = rel.replace(/^\/uploads\/?/, ""); // => "images/x.png"
+  return path.join(UPLOADS_DIR_ABS, sub);
 }
 
 export function ensureUploadsImagesDir(): string {
-  const dir = path.join(process.cwd(), "uploads", "images");
+  const dir = path.join(UPLOADS_DIR_ABS, "images");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

@@ -782,9 +782,6 @@ adminRouter.post("/files/retention/preview", requireAuth, requireSuperAdmin, asy
         tenants.map(t => [t.id, t.name])
     );
 
-    console.log("process.cwd() =", process.cwd());
-    console.log("UPLOADS_DIR_ABS =", UPLOADS_DIR_ABS);
-
     return res.json({
         opts: {
             previewTtlHours,

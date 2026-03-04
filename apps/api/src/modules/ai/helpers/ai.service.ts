@@ -1,5 +1,6 @@
 import path from "path";
 import fs from "fs";
+import { fontsDir } from "./fonts.service";
 
 type PostType =
   | 'DISH'
@@ -23,6 +24,12 @@ type AiEditSize = { w: number; h: number; label: "SQUARE" | "PORTRAIT" | "LANDSC
  * - portrait -> 1024x1536
  * - landscape -> 1536x1024
  */
+
+export function tenantFontsDir(tenantId: string) {
+  const dir = path.join(fontsDir, tenantId);
+  fs.mkdirSync(dir, { recursive: true });
+  return dir;
+}
 
 
 // preview resize helper (как в restyle)

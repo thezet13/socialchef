@@ -63,18 +63,16 @@ import { ApplyPresetModal } from "../../../components/ApplyPresetModal";
 import { useApplyPresetFlow } from "../../../features/presets/useApplyPresetFlow";
 
 import { ComboPreviewModal } from "../../../components/ComboPreviewModal";
+import { publicUrl } from "@/lib/adminApi";
 
 
-const apiBase =
-  process.env.NODE_ENV === "development"
-    ? (process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001")
-    : "/api";
+const apiBase = "/api";
 
 function toAbsUrl(apiBase: string, url?: string | null) {
   if (!url) return null;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
   // url типа "/uploads/..."
-  return `${apiBase}${url}`;
+  return publicUrl(url);
 }
 
 export default function ImagesPage() {
@@ -605,15 +603,6 @@ export default function ImagesPage() {
 
   const bakeBaseAbs = toAbsUrl(apiBase, editorBaseImageUrl);
   const bakeStyleAbs = toAbsUrl(apiBase, selected?.sourceImageUrl ?? null);
-
-  const baseThumbUrl =
-    editorBaseImageUrl
-      ? (editorBaseImageUrl.startsWith("http") ? editorBaseImageUrl : `${apiBase}${editorBaseImageUrl}`)
-      : null;
-
-  const changePhotoInputRef = useRef<HTMLInputElement | null>(null);
-
-  const [importingDesign, setImportingDesign] = useState(false);
 
   const textLimit = isPro ? Infinity : TEXT_LIMIT_FREE;
   const picLimit = isPro ? Infinity : PIC_LIMIT_FREE;
@@ -1157,7 +1146,7 @@ export default function ImagesPage() {
 
           targetDesignId = created.id;
           setProDesignId(created.id);
-          setProBaseImageUrl(`${apiBase}${created.baseImageUrl}`);
+          setProBaseImageUrl(`${created.baseImageUrl}`);
         } else {
           const created = await apiFetch<{
             id: string;
@@ -1174,7 +1163,7 @@ export default function ImagesPage() {
 
           targetDesignId = created.id;
           setProDesignId(created.id);
-          setProBaseImageUrl(`${apiBase}${created.baseImageUrl}`);
+          setProBaseImageUrl(`${created.baseImageUrl}`);
         }
 
         // reset transforms for clean start
@@ -1281,7 +1270,7 @@ export default function ImagesPage() {
   // };
 
 
-    async function handleAddStyle() {
+  async function handleAddStyle() {
     setAddStyleErr(null);
 
     const cost = getActionCostCredits("ADD_STYLE");
@@ -1432,7 +1421,7 @@ export default function ImagesPage() {
   function absUploadsUrl(maybeRel: string | null | undefined) {
     if (!maybeRel) return null;
     if (maybeRel.startsWith("http")) return maybeRel;
-    if (maybeRel.startsWith("/uploads/")) return `${apiBase}${maybeRel}`;
+    if (maybeRel.startsWith("/uploads/")) return `${maybeRel}`;
     return maybeRel;
   }
 
@@ -1473,197 +1462,6 @@ export default function ImagesPage() {
       setForegroundTransform(parseBaseTransform(design.foregroundTransformJson));
     }
   }
-
-
-
-
-  // async function handleDesignImportMvp() {
-  //   if (!authed) return;
-
-  //   if (!proBaseImageUrl) {
-  //     setError("Upload or generate a base image first");
-  //     return;
-  //   }
-
-  //   setError(null);
-  //   setImportingDesign(true);
-
-  //   try {
-  //     const rel = toRelativeUploadPath(proBaseImageUrl, apiBase);
-  //     if (!rel) throw new Error("Invalid base image URL");
-
-  //     const data = await apiFetch<{
-  //       overlay: {
-  //         meta?: { width?: number; height?: number; version?: number };
-  //         texts?: OverlayTextConfig[];
-  //         rects?: OverlayRectConfig[];
-  //         pics?: OverlayPicConfig[]
-  //       };
-  //       cleanBaseImageUrl?: string | null;
-  //     }>("/ai/design-import/analyze", {
-  //       method: "POST",
-  //       body: {
-  //         imageUrl: rel,
-  //         clean: true,
-  //         maskPad: 24,
-  //       },
-  //     });
-
-  //     const overlay = data.overlay ?? ({});
-  //     const textsCfg = overlay.texts ?? [];
-  //     const rectsCfg = overlay.rects ?? [];
-  //     const picsCfg = overlay.pics ?? [];
-
-  //     // ---- map Texts ----
-  //     const nextTexts: OverlayTextItem[] = textsCfg.map((t, idx) => ({
-  //       id: crypto.randomUUID(),
-  //       name: `Text ${idx + 1}`,
-  //       text: t.text,
-
-  //       alwaysOnTop: false,
-
-  //       color: t.color ?? "#ffffff",
-  //       fontFamily: t.fontFamily ?? "Inter",
-  //       fontSize: t.fontSize ?? 48,
-  //       fontWeight: t.fontWeight ?? 400,
-  //       fontStyle: t.fontStyle ?? "normal",
-
-  //       align: (t.align) ?? "top-left",
-  //       textAlign: t.textAlign ?? "left",
-  //       lineHeight: (t.lineHeight ?? 1.2),
-  //       textOpacity: (t.textOpacity ?? 1),
-
-  //       plaqueWidth: (t).plaqueWidth ?? 0,
-  //       plaqueColor: t.plaqueColor ?? "#ffffff",
-  //       plaqueOpacity: t.plaqueOpacity ?? 0,
-  //       plaqueBorderColor: t.plaqueBorderColor ?? "#000000",
-  //       plaqueBorderOpacity: t.plaqueBorderOpacity ?? 1,
-  //       plaqueBorderWidth: t.plaqueBorderWidth ?? 0,
-  //       borderRadius: (t).borderRadius ?? 0,
-
-  //       paddingTop: t.paddingTop ?? 0,
-  //       paddingRight: t.paddingRight ?? 0,
-  //       paddingBottom: t.paddingBottom ?? 0,
-  //       paddingLeft: t.paddingLeft ?? 0,
-
-  //       marginTop: t.marginTop ?? 0,
-  //       marginRight: t.marginRight ?? 0,
-  //       marginBottom: t.marginBottom ?? 0,
-  //       marginLeft: t.marginLeft ?? 0,
-
-  //       shadowColor: t.shadowColor ?? "#000000",
-  //       shadowOpacity: t.shadowOpacity ?? 0,
-  //       shadowBlur: t.shadowBlur ?? 0,
-  //       shadowOffsetX: t.shadowOffsetX ?? 0,
-  //       shadowOffsetY: t.shadowOffsetY ?? 0,
-
-  //       rotationDeg: t.rotationDeg ?? 0,
-  //     }));
-
-  //     // ---- map Rects ----
-  //     const nextRects: OverlayRectItem[] = rectsCfg.map((r, idx) => ({
-  //       id: crypto.randomUUID(),
-  //       name: `Rectangle ${idx + 1}`,
-
-  //       width: r.width,
-  //       height: r.height,
-  //       opacity: r.opacity ?? 1,
-
-  //       align: (r.align) ?? "top-left",
-  //       marginTop: r.marginTop ?? 0,
-  //       marginRight: r.marginRight ?? 0,
-  //       marginBottom: r.marginBottom ?? 0,
-  //       marginLeft: r.marginLeft ?? 0,
-
-  //       rotationDeg: r.rotationDeg ?? 0,
-  //       fill: r.fill,
-
-  //       borderColor: r.borderColor ?? "#000000",
-  //       borderWidth: r.borderWidth ?? 0,
-  //       borderRadius: r.borderRadius ?? 0,
-
-  //       alwaysOnTop: false,
-  //     }));
-
-  //     // ---- map Pics (MVP: backend чаще вернёт [] — ок) ----
-  //     const nextPics: OverlayPicItem[] = picsCfg.map((p, idx) => ({
-  //       id: crypto.randomUUID(),
-  //       name: `Pic ${idx + 1}`,
-
-  //       // у тебя в UI обычно абсолютный URL (apiBase + relative)
-  //       url: p.url?.startsWith("http") ? p.url : `${apiBase}${p.url}`,
-
-  //       alwaysOnTop: false,
-  //       width: p.width,
-  //       height: p.height,
-  //       opacity: p.opacity ?? 1,
-
-  //       align: p.align ?? "top-left",
-  //       marginTop: p.marginTop ?? 0,
-  //       marginRight: p.marginRight ?? 0,
-  //       marginBottom: p.marginBottom ?? 0,
-  //       marginLeft: p.marginLeft ?? 0,
-
-  //       aspectRatio: (p.height ?? 1) / (p.width ?? 1),
-  //       rotationDeg: p.rotationDeg ?? 0,
-  //     }));
-
-  //     // if (data.cleanBaseImageUrl) {
-  //     //   setProBaseImageUrl(`${apiBase}${data.cleanBaseImageUrl}`);
-  //     // }
-
-  //     setItems(nextTexts);
-  //     setRects(nextRects);
-  //     setPics(nextPics);
-
-  //     if (data.cleanBaseImageUrl) {
-  //       const cleanRel = stripQuery(data.cleanBaseImageUrl);
-  //       const created = await apiFetch<{
-  //         id: string;
-  //         baseImageUrl: string;
-  //         width: number;
-  //         height: number;
-  //       }>("/ai/pro-images/from-existing", {
-  //         method: "POST",
-  //         body: {
-  //           baseImageUrl: cleanRel,
-  //           baseWidth: activeFormat.width,
-  //           baseHeight: activeFormat.height,
-  //           imageAdjustments: imageAdj,
-  //         },
-  //       });
-
-  //       setProDesignId(created.id);
-  //       setProBaseImageUrl(`${apiBase}${created.baseImageUrl}`);
-
-  //       setImageAdj(imageAdj);
-
-  //       // reset transform for new base
-  //       setBaseScale(1);
-  //       setBaseOffsetX(0);
-  //       setBaseOffsetY(0);
-  //       setFitMode("contain");
-
-  //       setInfoMsg("Background expanded. Click Export to add it to History");
-  //       setInfoVisible(true);
-
-  //       setTimeout(() => {
-  //         setInfoVisible(false);
-  //       }, 3000);
-
-  //       // ещё через 300мс (длительность анимации) — убираем из DOM
-  //       setTimeout(() => {
-  //         setInfoMsg(null);
-  //       }, 3300);
-
-
-  //     }
-  //   } catch (err) {
-  //     setError(getErrorMessage(err));
-  //   } finally {
-  //     setImportingDesign(false);
-  //   }
-  // }
 
 
   function UploadDropzone({
@@ -1852,7 +1650,6 @@ export default function ImagesPage() {
 
       setProDesignId(data.id);
       const url = `${data.baseImageUrl}`;
-      //setProBaseImageUrl(`${apiBase}${data.baseImageUrl}`);
       setProBaseImageUrl(url);
       setUserBaseImageUrl(url);
       setUserProDesignId(data.id);
@@ -1908,7 +1705,7 @@ export default function ImagesPage() {
       throw new Error("Upload response has no imageUrl/baseImageUrl");
     }
 
-    const abs = rel.startsWith("http") ? rel : `${apiBase}${rel}`;
+    const abs = rel.startsWith("http") ? rel : rel;
 
     setComboItems(prev => [...prev, { id: makeId("combo"), imageUrl: rel, absUrl: abs }]);
   }
@@ -1930,7 +1727,7 @@ export default function ImagesPage() {
 
       // временно можно поставить текущую base картинку (чтобы слот был видим),
       // потом он будет заменён cutoutUrl
-      url: proBaseImageUrl ? `${apiBase}${proBaseImageUrl}` : "",
+      url: proBaseImageUrl ? `${proBaseImageUrl}` : "",
 
       visible: true,
       alwaysOnTop: false,
@@ -2008,7 +1805,7 @@ export default function ImagesPage() {
 
     const data = (await res.json()) as { url: string };
 
-    const imageUrl = `${apiBase}${data.url}`;
+    const imageUrl = `${data.url}`;
 
     const img = new Image();
     img.src = imageUrl;
@@ -2033,7 +1830,7 @@ export default function ImagesPage() {
     const newpic: OverlayPicItem = {
       id: crypto.randomUUID(),
       name: `pic ${pics.length + 1}`,
-      url: `${apiBase}${data.url}`, // чтобы сразу отображалось в preview
+      url: `${data.url}`, // чтобы сразу отображалось в preview
       alwaysOnTop: false,
       width,
       height,
@@ -2132,7 +1929,7 @@ export default function ImagesPage() {
       const done = applyCreditsFromResponse(data, setCreditsBalance);
       if (!done) await refreshMe();
 
-      const imageUrl = `${apiBase}${data.cutoutUrl}`;
+      const imageUrl = `${data.cutoutUrl}`;
 
       // ✅ получаем ratio через Image() как в твоём add pic
       const img = new Image();
@@ -2213,8 +2010,6 @@ export default function ImagesPage() {
 
       setProDesignId(data.id);
 
-
-      //setProBaseImageUrl(`${apiBase}${data.baseImageUrl}`);
       const url = `${data.baseImageUrl}`;
       setProBaseImageUrl(url);
       setUserBaseImageUrl(url);
@@ -2260,7 +2055,6 @@ export default function ImagesPage() {
       });
 
       setProDesignId(data.id);
-      //setProBaseImageUrl(`${apiBase}${data.baseImageUrl}`);
       const url = `${data.baseImageUrl}`;
       setUserProDesignId(data.id);
       setProBaseImageUrl(url);
@@ -2295,7 +2089,7 @@ export default function ImagesPage() {
 
       pics: pics
         .filter((p) => p.visible !== false)
-        .map((p) => picToOverlayCfg(p, apiBase)),
+        .map((p) => picToOverlayCfg(p)),
 
       rects: rects
         .filter((r) => r.visible !== false)
@@ -2411,7 +2205,6 @@ export default function ImagesPage() {
 
     try {
       setAiPhase("Expanding background…");
-      // same math as in handleRender()
       const kx = activeFormat.width / previewWidth;
       const ky = activeFormat.height / previewHeight;
 
@@ -3390,7 +3183,7 @@ export default function ImagesPage() {
 
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
-                              src={`${apiBase}${p.thumbnailUrl}`}
+                              src={`${p.thumbnailUrl}`}
                               alt={p.title ?? "Preset"}
                               className="w-full h-full object-contain"
                               draggable={false}
@@ -3545,7 +3338,7 @@ export default function ImagesPage() {
 
                       { /* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`${apiBase}${img.imageUrl}`}
+                        src={img.imageUrl}
                         alt={img.prompt}
                         className="w-full h-full object-contain"
                       />
@@ -3928,9 +3721,9 @@ export default function ImagesPage() {
                                           <div className="grid grid-cols-4 gap-2">
                                             {comboItems.map((it, idx) => (
                                               <div key={it.id} className="rounded-xl border border-slate-800 bg-slate-900/30 overflow-hidden justify-center">
-                                                <div className="relative aspect-[1/1] w-24 h-24 bg-red-500">
+                                                <div className="relative aspect-[1/1] w-24 h-24">
                                                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                                                  <img src={it.absUrl || `${apiBase}${it.imageUrl}`} alt={`Combo ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+                                                  <img src={it.absUrl || `${it.imageUrl}`} alt={`Combo ${idx + 1}`} className="absolute inset-0 w-full h-full object-cover" />
                                                   <div className="hidden absolute top-2 left-2 text-[11px] px-2 py-1 rounded-md bg-black/50 text-slate-100">
                                                     #{idx + 1}
                                                   </div>
@@ -4311,7 +4104,7 @@ export default function ImagesPage() {
                         >Upgrade</button>
                       )}
 
-                      {tab === "presets" && (
+                      {(tab === "presets" || tab === "brandStyles") && (
                         <>
                           <div className="mt-5 flex justify-center gap-2">
                             <div className="">
@@ -4391,7 +4184,7 @@ export default function ImagesPage() {
                                       baseWidth: baseWidth,
                                       baseHeight: baseHeight,
 
-                                      prompt: nextPrompt || "x",          // ✅ без any
+                                      prompt: nextPrompt || "x",
                                       imageOrigin: "AI" as const,
 
 
@@ -4601,7 +4394,7 @@ export default function ImagesPage() {
                             text-[13px]
                           "
                       >
-                        <RotateCcw size={14} /> <span>Reset</span>
+                        <RotateCcw size={14} /> <span>Reset all</span>
                       </button>
 
                       <div className="flex justify-between my-2">
@@ -4666,43 +4459,43 @@ export default function ImagesPage() {
                           {/* {isPro ? "" : `(${rects.length}/${rectLimit})`} */}
                         </button>
 
-
-                        <button
-                          type="button"
-                          onClick={() => cutPicInputRef.current?.click()}
-                          disabled={!canAddPic || aiBusy}
-                          className={` 
+                        {isSuperAdmin && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => cutPicInputRef.current?.click()}
+                              disabled={!canAddPic || aiBusy}
+                              className={` 
                             text-[20px] px-2 py-2 rounded-md border border-slate-700
                             ${canAddPic && !aiBusy
-                              ? "bg-slate-800/50 hover:bg-slate-800 text-slate-200"
-                              : "bg-slate-800/60 text-slate-400 cursor-not-allowed"}
+                                  ? "bg-slate-800/50 hover:bg-slate-800 text-slate-200"
+                                  : "bg-slate-800/60 text-slate-400 cursor-not-allowed"}
                             `}
-                          title="Add cutted pic"
-                        >
-                          <div className="flex items-center px-0 whitespace-nowrap gap-1">
-                            <SquareScissors size={26} className="text-slate-200" />
-                            <Flame className="w-4 h-4 text-orange-500" />
-                            <span className="text-orange-500 text-[14px]">{formatCredits(presetSwapCost)}</span>
-                            <span className="text-slate-500 items-center text-[12px] pr-2">(beta)</span>
-                          </div>
+                              title="Add cutted pic"
+                            >
+                              <div className="flex items-center px-0 whitespace-nowrap gap-1">
+                                <SquareScissors size={26} className="text-slate-200" />
+                                <Flame className="w-4 h-4 text-orange-500" />
+                                <span className="text-orange-500 text-[14px]">{formatCredits(presetSwapCost)}</span>
+                                <span className="text-slate-500 items-center text-[12px] pr-2">(beta)</span>
+                              </div>
 
-                        </button>
-
-
-
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/jpg,image/webp"
-                          ref={cutPicInputRef}
-                          className="hidden"
-                          onChange={(e) => {
-                            const f = e.target.files?.[0];
-                            if (f) {
-                              handleUploadCuttedPic(f).catch((err) => setError(getErrorMessage(err)));
-                              e.target.value = "";
-                            }
-                          }}
-                        />
+                            </button>
+                            <input
+                              type="file"
+                              accept="image/png,image/jpeg,image/jpg,image/webp"
+                              ref={cutPicInputRef}
+                              className="hidden"
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) {
+                                  handleUploadCuttedPic(f).catch((err) => setError(getErrorMessage(err)));
+                                  e.target.value = "";
+                                }
+                              }}
+                            />
+                          </>
+                        )}
 
 
 
@@ -4712,6 +4505,7 @@ export default function ImagesPage() {
 
                       <div className="mt-2 px-3 py-2 ">
                         <Section title="Layers">
+                          {/* // HOT123 */}
                           <div className="space-y-1">
                             {layers.map((l) => {
                               const key = `${l.kind}:${l.id}`;

@@ -108,7 +108,7 @@ function normalizeAssetUrl(raw: unknown): string {
   // уже абсолютный
   if (s.startsWith("http://") || s.startsWith("https://")) return s;
 
-  const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001";
+  const apiBase = "/api";
 
   // относительный от корня API
   if (s.startsWith("/")) return `${apiBase}${s}`;
@@ -116,7 +116,7 @@ function normalizeAssetUrl(raw: unknown): string {
   // относительный без /
   return `${apiBase}/${s}`;
 }
-
+ 
 // raw preset pic item can be messy too
 export type PresetPicRaw = Partial<OverlayPicItem> & Record<string, unknown>;
 

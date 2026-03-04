@@ -1,0 +1,65 @@
+services:
+  socialchef-db:
+    ports:
+      - "5445:5432"
+
+  api:
+    restart: "no"
+    build:
+      dockerfile: apps/api/Dockerfile.dev
+    command: ["pnpm", "-C", "/app/apps/api", "dev"]
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - api_node_modules:/app/node_modules
+      - api_app_node_modules:/app/apps/api/node_modules
+      - api_pkg_node_modules:/app/packages/shared/node_modules
+      - api_pro_fonts_node_modules:/app/packages/pro-fonts/node_modules
+      - uploads:/var/lib/socialchef/uploads
+
+  web:
+    restart: "no"
+    build:
+      dockerfile: apps/web/Dockerfile.dev
+    command: ["pnpm","-C","/app/apps/web","exec","next","dev","--webpack","-H","0.0.0.0","-p","3000"]
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: "http://127.0.0.1:8080"
+      WATCHPACK_POLLING: "true"
+      WATCHPACK_POLLING_INTERVAL: "1000"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - web_node_modules:/app/node_modules
+      - web_app_node_modules:/app/apps/web/node_modules
+      - web_pkg_node_modules:/app/packages/shared/node_modules
+      - web_pro_fonts_node_modules:/app/packages/pro-fonts/node_modules
+    ports:
+      - "3000:3000"
+
+  nginx:
+    restart: "no"
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:80"
+    depends_on:
+      - web
+      - api
+    volumes:
+      - ./nginx.dev.conf:/etc/nginx/nginx.conf:ro
+      - uploads:/var/lib/socialchef/uploads:ro
+
+volumes:
+  api_node_modules:
+  api_app_node_modules:
+  api_pkg_node_modules:
+  api_pro_fonts_node_modules:
+  web_node_modules:
+  web_app_node_modules:
+  web_pkg_node_modules:
+  web_pro_fonts_node_modules:
+  uploads:

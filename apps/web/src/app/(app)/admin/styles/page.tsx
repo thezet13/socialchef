@@ -13,7 +13,8 @@ export default function AdminStylesPage() {
   const authed = !!user;
 
   // если у тебя apiBase хранится иначе — подставь как в images/page.tsx
-  const apiBase = useMemo(() => process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001", []);
+
+  const apiBase = useMemo(() => "/api", []);
 
   const [items, setItems] = useState<StyleListItem[]>([]);
   const [loading, setLoading] = useState(false);

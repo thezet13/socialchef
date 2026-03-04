@@ -12,3 +12,10 @@ export function adminFetch<T>(path: string, init?: AdminFetchInit) {
     body: init?.body,
   });
 }
+
+export function publicUrl(u?: string | null) {
+  if (!u) return null;
+  if (u.startsWith("http://") || u.startsWith("https://")) return u;
+  if (u.startsWith("/api/uploads/")) return u.replace("/api", ""); // защита от старых багов
+  return u.startsWith("/") ? u : `/${u}`;
+}

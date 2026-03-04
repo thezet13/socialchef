@@ -110,7 +110,7 @@ export async function listBrandStyles(
  * а для FormData нельзя ставить Content-Type вручную.
  */
 export async function uploadBrandStyleImage(file: File) {
-  const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:4001";
+  const API_URL = "/api";
 
   const form = new FormData();
   form.append("file", file);

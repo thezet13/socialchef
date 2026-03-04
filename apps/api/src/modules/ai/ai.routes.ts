@@ -6,7 +6,6 @@ import sharp from "sharp";
 import { PlanType } from "@prisma/client";
 import { createCanvas, GlobalFonts, loadImage } from '@napi-rs/canvas';
 import multer from 'multer';
-
 import { prisma } from '../../lib/prisma';
 
 import { requireAuth } from '../../middleware/requireAuth';
@@ -58,6 +57,9 @@ import { ComboGpt15Body } from './types/combo.types';
 import { buildComboPrompt } from '../combo/buildComboPrompt';
 
 import { ensureAssetForUploadsUrl, uploadsUrlToAbsPath, linkAssetToProDesign } from "../../lib/assets";
+import { ensureFontsRegistered } from '../../lib/registerFonts';
+import { ImageAdjustments, renderCompositeImage } from './renderCompositeImage';
+
 
 const aiRouter: import("express").Router = Router();
 
@@ -88,7 +90,7 @@ aiRouter.post("/pro-images/commit-preview",
       const srcName = body.previewImageUrl.split("/").pop();
       if (!srcName) return res.status(400).json({ error: "Invalid previewImageUrl" });
 
-      const srcPath = path.join(process.cwd(), "uploads", "images", srcName);
+      const srcPath = path.join(UPLOADS_DIR_ABS, "images", srcName);
       if (!fs.existsSync(srcPath)) return res.status(404).json({ error: "File not found" });
 
       const updated = await prisma.proDesign.update({
@@ -184,8 +186,8 @@ aiRouter.post("/pro-images/restyle-gpt15", requireAuth, withTenant,
 
 
       // load base image from disk (same approach as your expand-background endpoint)
-      const uploadsStylesDir = path.join(process.cwd(), "uploads", "image-styles");
-      const uploadsBaseDir = path.join(process.cwd(), "uploads", "images");
+      const uploadsStylesDir = path.join(UPLOADS_DIR_ABS, "image-styles");
+      const uploadsBaseDir = path.join(UPLOADS_DIR_ABS, "images");
 
       const baseFilename = design.baseImageUrl.split("/").pop();
       if (!baseFilename) return res.status(500).json({ error: "Invalid baseImageUrl" });
@@ -257,11 +259,19 @@ aiRouter.post("/pro-images/restyle-gpt15", requireAuth, withTenant,
         quality,
       } as any);
 
-      const b64 = (edited as any)?.data?.[0]?.b64_json;
+      const item0 = (edited as any)?.data?.[0];
+      const b64 = item0?.b64_json;
+
       if (!b64) {
-        console.error("No b64_json from GPT Image (edit)", edited);
+        console.error("No b64_json from GPT Image (edit)", {
+          hasData: Array.isArray((edited as any)?.data),
+          dataLen: (edited as any)?.data?.length,
+          keys0: item0 ? Object.keys(item0) : null,
+        });
         return res.status(500).json({ error: "AI did not return an image" });
       }
+
+      console.log("[restyle] b64 length:", b64.length);
 
       const outBytes = Buffer.from(b64, "base64");
 
@@ -495,12 +505,13 @@ aiRouter.post("/pro-images/dish-cutout",
     }
   }
 );
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
 });
-aiRouter.post(
-  "/pro-images/dish-cutout-upload",
+
+aiRouter.post("/pro-images/dish-cutout-upload",
   requireAuth,
   withTenant,
   upload.single("file"),
@@ -644,7 +655,7 @@ aiRouter.post("/pro-images/:id/expand-background",
         (body.baseTransform ?? (design as any).baseTransformJson ?? { scale: 1, offsetX: 0, offsetY: 0, fitMode: "contain" }) as BaseTransform;
 
       // load base image from disk
-      const uploadsDirLocal = path.join(process.cwd(), "uploads", "images");
+      const uploadsDirLocal = path.join(UPLOADS_DIR_ABS, "images");
       const baseFilename = design.baseImageUrl.split("/").pop();
       if (!baseFilename) return res.status(500).json({ error: "Invalid baseImageUrl" });
 
@@ -808,7 +819,7 @@ aiRouter.post("/design-import/analyze",
       //   return res.status(400).json({ error: "imageUrl must be a /uploads/... path" });
       // }
 
-      const filePath = path.join(process.cwd(), imageUrl.replace(/^\//, ""));
+      const filePath = path.join(UPLOADS_DIR_ABS, imageUrl.replace(/^\//, ""));
       if (!fs.existsSync(filePath)) {
         return res.status(404).json({ error: "Image file not found" });
       }
@@ -1030,7 +1041,7 @@ aiRouter.post("/design-import/analyze",
         });
 
         const cleanName = `clean_${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
-        const cleanPath = path.join(UPLOADS_DIR_ABS, cleanName);
+        const cleanPath = path.join(UPLOADS_DIR_ABS, "images", cleanName);
         fs.writeFileSync(cleanPath, bytes);
 
         cleanBaseImageUrl = `/uploads/images/${cleanName}`;
@@ -1278,7 +1289,11 @@ aiRouter.post('/posts/generate',
       const mainText = (response as any).output_text as string | undefined;
 
       if (!mainText) {
-        console.error('No output_text from OpenAI', response);
+        console.error("No output_text from OpenAI", {
+          id: (response as any)?.id,
+          model: (response as any)?.model,
+          hasOutput: Array.isArray((response as any)?.output),
+        });
         return res.status(500).json({ error: 'AI did not return any text' });
       }
 
@@ -1476,7 +1491,7 @@ aiRouter.post("/pro-images/:id/bake-gpt15/preview", requireAuth, withTenant, asy
       safeInsetPct: body.safeInsetPct,
     });
 
-    
+
 
     // save preview png (в uploads)
     const { url: previewImageUrl } = savePngToUploads({
@@ -1500,7 +1515,6 @@ aiRouter.post("/pro-images/:id/bake-gpt15/preview", requireAuth, withTenant, asy
     return res.status(500).json({ error: "Internal server error" });
   }
 });
-
 
 aiRouter.post("/pro-images/:id/bake-gpt15/commit", requireAuth, withTenant, async (req, res) => {
   try {
@@ -1541,6 +1555,194 @@ aiRouter.post("/pro-images/:id/bake-gpt15/commit", requireAuth, withTenant, asyn
   }
 });
 
+aiRouter.post("/pro-images/:id/render", requireAuth,
+  withTenant,
+  async (req, res) => {
+    try {
+      if (!req.auth) return res.status(401).json({ error: "Unauthorized" });
+
+      const { tenantId } = req.auth;
+      const { id } = req.params;
+
+      type Body = {
+        outputWidth?: number;
+        outputHeight?: number;
+        baseWidth?: number;
+        baseHeight?: number;
+        baseTransform?: BaseTransform;
+        imageAdjustments?: ImageAdjustments;
+        overlay?:
+        | { texts?: OverlayTextConfig; pics?: OverlayPicConfig[]; rects?: OverlayRectConfig[] }
+        | string;
+        saveToHistory?: boolean;
+      };
+
+      const body = req.body as Body;
+      const saveToH = body.saveToHistory !== false;
+
+      const design = await prisma.proDesign.findFirst({ where: { id, tenantId } });
+      if (!design) return res.status(404).json({ error: "ProDesign not found" });
+
+      const sub = await prisma.subscription.findUnique({
+        where: { tenantId },
+        select: { plan: true },
+      });
+
+      const plan: PlanType = sub?.plan ?? PlanType.FREE;
+      const watermarkEnabled = plan === PlanType.FREE;
+
+      const requestedOutW = Number(body.outputWidth ?? design.width ?? 1024);
+      const requestedOutH = Number(body.outputHeight ?? design.height ?? 1024);
+
+      if (!Number.isFinite(requestedOutW) || !Number.isFinite(requestedOutH) || requestedOutW <= 0 || requestedOutH <= 0) {
+        return res.status(400).json({ error: "Invalid outputWidth/outputHeight" });
+      }
+
+      const planMax = getMaxExportPxForPlan(plan);
+      const hardMax = MAX_CANVAS_SIZE;
+      const STANDARD_MAX = 1920;
+
+      const isExportOnly = saveToH === false;
+
+      const maxAllowed = isExportOnly
+        ? Math.min(Math.max(planMax, STANDARD_MAX), hardMax)
+        : Math.min(planMax, hardMax);
+
+      const { outW, outH } = clampOutSize(requestedOutW, requestedOutH, maxAllowed);
+
+      const baseW = Number(body.baseWidth ?? (design as any).baseWidth ?? design.width ?? outW);
+      const baseH = Number(body.baseHeight ?? (design as any).baseHeight ?? design.height ?? outH);
+
+      if (!Number.isFinite(baseW) || !Number.isFinite(baseH) || baseW <= 0 || baseH <= 0) {
+        return res.status(400).json({ error: "Invalid baseWidth/baseHeight" });
+      }
+
+      // baseTransform
+      const baseTransform = ((body.baseTransform ?? (design as any).baseTransformJson ?? {}) as BaseTransform);
+
+      // uploads/images dir
+      const uploadsDir = uploadsImagesDir;
+
+      // base image path
+      const baseFilename = design.baseImageUrl.split("/").pop();
+      if (!baseFilename) return res.status(500).json({ error: "Invalid baseImageUrl" });
+
+      const basePath = path.join(uploadsDir, baseFilename);
+
+      // overlay normalize
+      const overlay =
+        body.overlay == null
+          ? normalizeOverlay(design.overlayJson)
+          : typeof body.overlay === "string"
+            ? normalizeOverlay(JSON.parse(body.overlay))
+            : normalizeOverlay(body.overlay);
+
+      // ✅ stripHidden используем реально
+      function stripHidden(o: any) {
+        if (!o || typeof o !== "object") return o;
+        const next = { ...o };
+        if (Array.isArray(next.texts)) next.texts = next.texts.filter((t: any) => t?.visible !== false);
+        if (Array.isArray(next.pics)) next.pics = next.pics.filter((p: any) => p?.visible !== false);
+        if (Array.isArray(next.rects)) next.rects = next.rects.filter((r: any) => r?.visible !== false);
+        return next;
+      }
+
+      const overlayClean = stripHidden(overlay);
+
+      ensureFontsRegistered();
+
+      // ✅ render используем overlayClean
+      const pngBuffer = await renderCompositeImage({
+        baseImagePath: basePath,
+        outW,
+        outH,
+        baseW,
+        baseH,
+        baseTransform,
+        imageAdjustments: body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? undefined,
+        overlay: overlayClean,
+        uploadsDir,
+        watermark: watermarkEnabled,
+      });
+
+      // export-only: no write, no db
+      if (!saveToH) {
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Content-Disposition", `inline; filename="export_${outW}x${outH}.png"`);
+        return res.status(200).send(pngBuffer);
+      }
+
+      // persist: write final file
+      const finalId = `final_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const finalFilename = `${finalId}.png`;
+      const finalPath = path.join(uploadsDir, finalFilename);
+
+      fs.writeFileSync(finalPath, pngBuffer);
+
+      const finalImageUrl = `/uploads/images/${finalFilename}`;
+
+      // ✅ объявляем ОДИН РАЗ
+      let generatedImageId: string | undefined;
+      let deletedFromHistory = 0;
+
+      if (saveToH) {
+        await prisma.proDesign.update({
+          where: { id: design.id },
+          data: {
+            finalImageUrl,
+            overlayJson: overlayClean ? (overlayClean as any) : null,
+            baseTransformJson: baseTransform as any,
+            imageAdjustmentsJson: (body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? null) as any,
+            baseWidth: baseW,
+            baseHeight: baseH,
+            status: "RENDERED",
+            width: outW,
+            height: outH,
+          },
+        });
+
+        const created = await prisma.generatedImage.create({
+          data: {
+            tenantId,
+            prompt: design.prompt,
+            style: design.style ?? null,
+            imageUrl: finalImageUrl,
+            width: outW,
+            height: outH,
+            origin: "AI",
+            proDesignId: design.id,
+          },
+          select: { id: true },
+        });
+
+        // ✅ присваиваем, НЕ объявляем заново
+        generatedImageId = created.id;
+
+        const cap = await enforceExportHistory(prisma, tenantId, EXPORT_CAP);
+        deletedFromHistory = cap.deleted;
+      }
+
+      return res.status(201).json({
+        proDesignId: design.id,
+        finalImageUrl,
+        generatedImageId,
+        width: outW,
+        height: outH,
+        requestedWidth: requestedOutW,
+        requestedHeight: requestedOutH,
+        plan,
+        maxAllowed,
+        saveToH,
+        watermarkEnabled,
+        deletedFromHistory, // дебаг: сколько удалили
+      });
+
+    } catch (err) {
+      console.error("[POST /ai/pro-images/:id/render] error", err);
+      return res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
 
 aiRouter.get("/pro-images/:id",
   requireAuth, withTenant, async (req, res) => {
@@ -1591,124 +1793,6 @@ aiRouter.get("/me/capabilities",
       return res.status(500).json({ error: "Internal server error" });
     }
   });
-
-// aiRouter.post("/images/generate",
-//   requireAuth,
-//   withTenant,
-//   async (req, res) => {
-//     try {
-//       if (!req.auth) {
-//         return res.status(401).json({ error: "Unauthorized" });
-//       }
-
-//       const { userId, tenantId } = req.auth;
-//       const body = req.body as GenerateImageBody;
-
-//       if (!body.prompt) {
-//         return res.status(400).json({ error: "prompt is required" });
-//       }
-
-//       const width = body.width ?? 1024;
-//       const height = body.height ?? 1024;
-
-//       const aspect = width / height;
-
-//       const style = body.style ?? "instagram_dark";
-
-//       const fullPrompt = `
-//     Food photography of a dish for a restaurant social media.
-//     Style: ${style}.
-//     ${body.prompt}
-//     Dark, high contrast, instagram-friendly composition.
-//     No text in the image.
-//     `.trim();
-
-//       /* IMAGE API */
-
-
-//       console.log("🔥 /images/generate USING SDXL");
-
-//       const baseImageBuffer = await generateWithSDXL(fullPrompt, width, height);
-
-
-//       const canvas = createCanvas(width, height);
-//       const ctx = canvas.getContext("2d");
-
-//       const baseImage = await loadImage(baseImageBuffer);
-
-//       ctx.drawImage(baseImage, 0, 0, width, height);
-
-
-//       const fileId = `img_${Date.now()}_${Math.random()
-//         .toString(36)
-//         .slice(2, 8)}`;
-//       const filename = `${fileId}.png`;
-//       const filePath = path.join(UPLOADS_DIR_ABS, filename);
-
-//       const pngBuffer = await canvas.encode("png");
-//       fs.writeFileSync(filePath, pngBuffer);
-
-//       const baseImageUrl = `/uploads/images/${filename}`;
-
-//       // создаём ProDesign
-//       const design = await prisma.proDesign.create({
-//         data: {
-//           tenantId,
-//           userId,
-//           prompt: body.prompt,
-//           style,
-//           width,
-//           height,
-//           baseImageUrl,
-//           finalImageUrl: undefined,
-//           overlayJson: undefined,
-//           status: "DRAFT",
-//         },
-//       });
-
-//       const { periodStart, periodEnd } =
-//         await resolveCurrentPeriodForTenant(tenantId);
-
-//       await prisma.aIUsagePeriod.upsert({
-//         where: {
-//           tenantId_periodStart_periodEnd: {
-//             tenantId,
-//             periodStart,
-//             periodEnd,
-//           },
-//         },
-//         update: {
-//           imageCount: {
-//             increment: 1,
-//           },
-//         },
-//         create: {
-//           tenantId,
-//           periodStart,
-//           periodEnd,
-//           textCount: 0,
-//           imageCount: 1,
-//           planCount: 0,
-//         },
-//       });
-
-//       return res.status(201).json({
-//         id: design.id,
-//         baseImageUrl,
-//         width,
-//         height,
-//         prompt: design.prompt,
-//         style: design.style,
-//         tenantId: design.tenantId,
-//         createdAt: design.createdAt,
-//       });
-
-//     } catch (err) {
-//       console.error("[POST /ai/images/generate] error", err);
-//       return res.status(500).json({ error: "Internal server error" });
-//     }
-//   }
-// );
 
 aiRouter.post("/pro-fonts/upload",
   requireAuth,
@@ -1820,7 +1904,7 @@ aiRouter.post("/pro-assets/upload-image",
       const plan = await getTenantPlan(tenantId);
       await assertLibraryQuota(tenantId, plan);
 
-      const uploadsDir = path.join(process.cwd(), "uploads", "images");
+      const uploadsDir = path.join(UPLOADS_DIR_ABS, "images");
       if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
       const id = `asset_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -1922,8 +2006,8 @@ aiRouter.post("/pro-images/combo-gpt15",
       const formatId = (body.formatId as FormatId | undefined) ?? inferFormatId(widthFinal, heightFinal);
 
       // load style reference from disk
-      const uploadsStylesDir = path.join(process.cwd(), "uploads", "image-styles");
-      const uploadsImagesDir = path.join(process.cwd(), "uploads", "images");
+      const uploadsStylesDir = path.join(UPLOADS_DIR_ABS, "image-styles");
+      const uploadsImagesDir = path.join(UPLOADS_DIR_ABS, "images");
 
       const dbStyle = await prisma.style.findFirst({
         where: {
@@ -1990,9 +2074,15 @@ aiRouter.post("/pro-images/combo-gpt15",
         quality,
       } as any);
 
-      const b64 = (edited as any)?.data?.[0]?.b64_json;
+      const item0 = (edited as any)?.data?.[0];
+      const b64 = item0?.b64_json;
+
       if (!b64) {
-        console.error("No b64_json from GPT Image (combo edit)", edited);
+        console.error("No b64_json from GPT Image (combo edit)", {
+          hasData: Array.isArray((edited as any)?.data),
+          dataLen: (edited as any)?.data?.length,
+          keys0: item0 ? Object.keys(item0) : null,
+        });
         return res.status(500).json({ error: "AI did not return an image" });
       }
 
@@ -2210,252 +2300,6 @@ aiRouter.post("/pro-images/create-empty-design", requireAuth, withTenant, async 
     return res.status(500).json({ error: "Internal error" });
   }
 });
-
-
-// aiRouter.post("/pro-images/generate-dalle",
-//   requireAuth,
-//   withTenant,
-//   async (req, res) => {
-//     try {
-//       if (!req.auth) {
-//         return res.status(401).json({ error: "Unauthorized" });
-//       }
-
-//       const { userId, tenantId } = req.auth;
-//       const body = req.body as GenerateImageBody;
-
-//       if (!body.prompt) {
-//         return res.status(400).json({ error: "prompt is required" });
-//       }
-
-//       const width = body.width ?? 1024;
-//       const height = body.height ?? 1024;
-
-//       const aspect = width / height;
-
-//       const style = body.style ?? "instagram_dark";
-
-//       const fullPrompt = `
-//          ${style}.
-//         ${body.prompt}
-
-//         `.trim();
-
-//       /* IMAGE API */
-//       let dalleSize: "1024x1024" | "1024x1792" | "1792x1024" = "1024x1024";
-
-//       if (aspect < 0.9) dalleSize = "1024x1792";      // portrait
-//       else if (aspect > 1.1) dalleSize = "1792x1024"; // landscape
-//       else dalleSize = "1024x1024";                   // square
-
-//       if (!process.env.OPENAI_API_KEY) {
-//         return res.status(500).json({
-//           error: "OPENAI_API_KEY is not configured on the server",
-//         });
-//       }
-//       /** */
-
-
-//       const imageResponse = await openai.images.generate({
-//         model: "dall-e-3",
-//         prompt: fullPrompt,
-//         size: dalleSize,
-//         response_format: "b64_json",
-//       });
-//       const b64 = imageResponse.data?.[0]?.b64_json;
-//       if (!b64) {
-//         console.error("No b64_json from OpenAI images", imageResponse);
-//         return res.status(500).json({ error: "AI did not return an image" });
-//       }
-
-
-//       console.log("🤖 /pro-images/generate USING DALL·E");
-
-//       const baseImageBuffer = Buffer.from(b64, "base64");
-
-//       const canvas = createCanvas(width, height);
-//       const ctx = canvas.getContext("2d");
-
-//       const baseImage = await loadImage(baseImageBuffer);
-
-//       ctx.drawImage(baseImage, 0, 0, width, height);
-
-
-//       const fileId = `ai_base_${Date.now()}_${Math.random()
-//         .toString(36)
-//         .slice(2, 8)}`;
-//       const filename = `${fileId}.png`;
-//       const filePath = path.join(UPLOADS_DIR_ABS, filename);
-
-//       const pngBuffer = await canvas.encode("png");
-//       fs.writeFileSync(filePath, pngBuffer);
-
-//       const baseImageUrl = `/uploads/images/${filename}`;
-
-//       // создаём ProDesign
-//       const design = await prisma.proDesign.create({
-//         data: {
-//           tenantId,
-//           userId,
-//           prompt: body.prompt,
-//           style,
-//           width,
-//           height,
-//           baseImageUrl,
-//           finalImageUrl: undefined,
-//           overlayJson: undefined,
-//           status: "DRAFT",
-//         },
-//       });
-
-
-//       const { periodStart, periodEnd } =
-//         await resolveCurrentPeriodForTenant(tenantId);
-
-//       await prisma.aIUsagePeriod.upsert({
-//         where: {
-//           tenantId_periodStart_periodEnd: {
-//             tenantId,
-//             periodStart,
-//             periodEnd,
-//           },
-//         },
-//         update: {
-//           imageCount: {
-//             increment: 1,
-//           },
-//         },
-//         create: {
-//           tenantId,
-//           periodStart,
-//           periodEnd,
-//           textCount: 0,
-//           imageCount: 1,
-//           planCount: 0,
-//         },
-//       });
-
-
-//       return res.status(201).json({
-//         id: design.id,
-//         baseImageUrl,
-//         width,
-//         height,
-//         prompt: design.prompt,
-//         style: design.style,
-//         tenantId: design.tenantId,
-//         createdAt: design.createdAt,
-//       });
-//     } catch (err) {
-//       console.error("[POST /ai/pro-images/generate] error", err);
-//       return res.status(500).json({ error: "Internal server error" });
-//     }
-//   }
-// );
-
-// aiRouter.post("/pro-images/generate-gpt15",
-//   requireAuth,
-//   withTenant,
-//   async (req, res) => {
-//     try {
-//       if (!req.auth) return res.status(401).json({ error: "Unauthorized" });
-
-//       const { userId, tenantId } = req.auth;
-//       const body = req.body as GenerateImageBody;
-
-//       if (!body.prompt) return res.status(400).json({ error: "prompt is required" });
-
-//       const width = body.width ?? 1024;
-//       const height = body.height ?? 1024;
-//       const aspect = width / height;
-//       const style = body.style ?? "instagram_dark";
-
-//       const fullPrompt = `
-//         Food photography of a dish for a restaurant social media.
-//         Style: ${style}.
-//         ${body.prompt}
-//         Dark, high contrast, instagram-friendly composition.
-//         No text in the image.
-//         `.trim();
-
-//       // gpt-image-1.5 via Images API :contentReference[oaicite:1]{index=1}
-//       if (!process.env.OPENAI_API_KEY) {
-//         return res.status(500).json({ error: "OPENAI_API_KEY is not configured on the server" });
-//       }
-
-//       console.log("🧠 /pro-images/generate-gpt15 USING gpt-image-1.5");
-
-//       // sizes: GPT Image models support output_format and different sizing rules than DALL·E;
-//       // simplest: generate at "auto" and then draw into your canvas size
-//       const imageResponse = await openai.images.generate({
-//         model: "gpt-image-1.5",
-//         prompt: fullPrompt,
-//         size: "auto",
-//         output_format: "png",
-//       } as any);
-
-//       const b64 = (imageResponse as any).data?.[0]?.b64_json;
-//       if (!b64) {
-//         console.error("No b64_json from GPT Image", imageResponse);
-//         return res.status(500).json({ error: "AI did not return an image" });
-//       }
-
-//       const baseImageBuffer = Buffer.from(b64, "base64");
-
-//       // дальше — 1-в-1 как у тебя в /pro-images/generate:
-//       const canvas = createCanvas(width, height);
-//       const ctx = canvas.getContext("2d");
-
-//       const baseImage = await loadImage(baseImageBuffer);
-//       ctx.drawImage(baseImage, 0, 0, width, height);
-
-//       const fileId = `ai_base_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-//       const filename = `${fileId}.png`;
-//       const filePath = path.join(UPLOADS_DIR_ABS, filename);
-
-//       const pngBuffer = await canvas.encode("png");
-//       fs.writeFileSync(filePath, pngBuffer);
-
-//       const baseImageUrl = `/uploads/images/${filename}`;
-
-//       const design = await prisma.proDesign.create({
-//         data: {
-//           tenantId,
-//           userId,
-//           prompt: body.prompt,
-//           style,
-//           width,
-//           height,
-//           baseImageUrl,
-//           finalImageUrl: undefined,
-//           overlayJson: undefined,
-//           status: "DRAFT",
-//         },
-//       });
-
-//       const { periodStart, periodEnd } = await resolveCurrentPeriodForTenant(tenantId);
-//       await prisma.aIUsagePeriod.upsert({
-//         where: { tenantId_periodStart_periodEnd: { tenantId, periodStart, periodEnd } },
-//         update: { imageCount: { increment: 1 } },
-//         create: { tenantId, periodStart, periodEnd, textCount: 0, imageCount: 1, planCount: 0 },
-//       });
-
-//       return res.status(201).json({
-//         id: design.id,
-//         baseImageUrl,
-//         width,
-//         height,
-//         prompt: design.prompt,
-//         style: design.style,
-//         tenantId: design.tenantId,
-//         createdAt: design.createdAt,
-//       });
-//     } catch (err) {
-//       console.error("[POST /ai/pro-images/generate-gpt15] error", err);
-//       return res.status(500).json({ error: "Internal server error" });
-//     }
-//   }
-// );
 
 
 export { aiRouter };

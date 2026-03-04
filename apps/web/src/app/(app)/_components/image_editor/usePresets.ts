@@ -139,7 +139,7 @@ export function usePresets(): PresetsHook {
       }
       await reloadPresets();
     },
-    [authed, presets]
+    [authed, presets, reloadPresets]
   );
 
   const renderThumbnail = useCallback(

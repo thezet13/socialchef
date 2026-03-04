@@ -1,0 +1,14 @@
+FROM node:20-bookworm-slim
+WORKDIR /app
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages ./packages
+
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/apps/web
+EXPOSE 3000
+CMD ["pnpm","dev:docker"]
