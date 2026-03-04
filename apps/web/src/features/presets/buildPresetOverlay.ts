@@ -19,7 +19,7 @@ export function buildPresetOverlay(args: {
 }): PresetOverlay {
   return {
     texts: args.items.map(itemToOverlayCfg),
-    pics: args.pics.map((l) => picToOverlayCfg(l, args.apiBase)),
+    pics: args.pics.map((l) => picToOverlayCfg(l)),
     rects: args.rects.map(rectToOverlayCfg),
     meta: { version: 1 },
   };
