@@ -544,8 +544,8 @@ presetsRouter.post("/:id/render-thumbnail", requireAuth, withTenant, async (req,
         format: true,
 
         // важно: фон пресета
-        backgroundImageUrl: true,     // ✅ добавили
-        baseImageUrl: true,           // optional fallback
+        backgroundImageUrl: true,     
+        baseImageUrl: true,           
 
         baseTransformJson: true,
         baseWidth: true,

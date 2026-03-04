@@ -4,7 +4,7 @@ import fs from "fs";
 import { type ImageAdjustments } from "../ai/renderCompositeImage";
 import { Prisma } from "@prisma/client";
 import crypto from "crypto";
-import { UPLOADS_DIR_ABS } from "@/lib/uploadsPaths";
+import { UPLOADS_DIR_ABS } from "../../lib/uploadsPaths";
 
 export function toListDto(p: any): PresetListDto {
   return {

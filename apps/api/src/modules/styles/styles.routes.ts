@@ -135,7 +135,6 @@ stylesRouter.post("/analyze", requireAuth, withTenant, async (req, res) => {
         if (isLocalhostUrl(absoluteUrl) && normalized.startsWith("/uploads/image-styles/")) {
             // локальная разработка: читаем файл и шлём data URL
             const abs = uploadsAbsPathWithFolder(normalized);
-            console.log("abs -", abs);
 
             visionImageUrl = fileToDataUrl(abs);
         } else {
@@ -168,7 +167,6 @@ Return ONLY valid JSON. No markdown. No code fences.
 Reference style image: ${absoluteUrl}
 Optional hint/title: ${body.hintTitle ?? "(none)"}
 `.trim();
-        console.log("visionImageUrl -", visionImageUrl);
 
         const r = await openai.responses.create({
             model: "gpt-4o-mini",
