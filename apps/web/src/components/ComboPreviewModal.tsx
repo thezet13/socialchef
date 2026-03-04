@@ -39,7 +39,7 @@ type Props = {
 
 export function ComboPreviewModal(props: Props) {
     const {
-        open, onClose, apiBase, proDesignId, styleId, formatId,
+        open, onClose, proDesignId, styleId, formatId,
         items, initialPrompt, creditsBalance, plan, styleRefUrl,
     } = props;
 
