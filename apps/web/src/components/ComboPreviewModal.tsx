@@ -40,10 +40,10 @@ type Props = {
 export function ComboPreviewModal(props: Props) {
     const {
         open, onClose, apiBase, proDesignId, styleId, formatId,
-        items, initialPrompt, creditsBalance, plan, onUseInEditor, styleRefUrl,
+        items, initialPrompt, creditsBalance, plan, styleRefUrl,
     } = props;
 
-    const { user, me } = useAuth();
+    const { user } = useAuth();
     const authed = !!user;
 
     const formatDef = useMemo(() => getFormatById(formatId), [formatId]);
@@ -310,7 +310,7 @@ export function ComboPreviewModal(props: Props) {
                                 {previewUrl ? (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img
-                                        src={`${apiBase}${previewUrl}`}
+                                        src={`${previewUrl}`}
                                         alt="Combo preview"
                                         className="absolute inset-0 w-full h-full object-contain"
                                     />
