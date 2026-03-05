@@ -1651,6 +1651,7 @@ aiRouter.post("/pro-images/:id/render", requireAuth,
 
       ensureFontsRegistered();
 
+      const start = Date.now();
       // ✅ render используем overlayClean
       const pngBuffer = await renderCompositeImage({
         baseImagePath: basePath,
@@ -1664,6 +1665,9 @@ aiRouter.post("/pro-images/:id/render", requireAuth,
         uploadsDir,
         watermark: watermarkEnabled,
       });
+      const ms = Date.now() - start;
+
+      console.log("EXPORT_TIME_MS", ms);
 
       // export-only: no write, no db
       if (!saveToH) {
