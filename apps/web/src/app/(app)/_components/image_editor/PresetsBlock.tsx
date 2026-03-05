@@ -93,7 +93,7 @@ export function PresetsBlock<T>(props: PresetsBlockProps<T>) {
 
   return (
     <div className={className ?? ""}>
-      <div className="flex items-center gap-2 mb-2 px-5">
+      <div className="flex items-center gap-2 px-5">
         {loading && <span className="text-xs text-slate-400">Loading…</span>}
         {error && <span className="text-xs text-red-400">{error}</span>}
       </div>
