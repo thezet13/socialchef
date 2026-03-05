@@ -200,16 +200,6 @@ export default function ImagesPage() {
   const [creatingBrand, setCreatingBrand] = useState(false);
 
 
-  const pickerStyles = useMemo(() => {
-    return dbStyles.map((s) => ({
-      id: s.id,
-      previewThumbUrl: s.thumbnailUrl,
-      label: s.title,
-      description: s.scope === "TENANT" ? "My style" : "System style",
-      scope: s.scope,
-    }));
-  }, [dbStyles]);
-
   const selectedStyleThumbUrl = useMemo(() => {
     if (!styleId) return null;
     const s = dbStyles.find((x) => x.id === styleId);
@@ -276,6 +266,10 @@ export default function ImagesPage() {
     enforceFontCaps,
   } = useFonts();
 
+
+  const [isRendering, setIsRendering] = useState(false);
+  const [renderingId, setRenderingId] = useState<string | null>(null);
+  const [loadingImgId, setLoadingImgId] = useState<string | null>(null);
 
   type TabId = "styles" | "brandStyles" | "presets";
   const [tab, setTab] = useState<TabId>("styles");
@@ -2103,6 +2097,9 @@ export default function ImagesPage() {
     const offsetYOut = baseOffsetY * ky;
 
     try {
+      setIsRendering(true);
+      setRenderingId(proDesignId);
+
       const res = await apiFetch<{
         proDesignId: string;
         finalImageUrl: string;
@@ -2123,6 +2120,8 @@ export default function ImagesPage() {
           overlay: overlayFromItems,
         },
       });
+
+      setLoadingImgId(res.generatedImageId);
 
       setImages((prev) => {
         const next = [
@@ -2146,6 +2145,8 @@ export default function ImagesPage() {
         return Array.from(map.values()).slice(0, EXPORT_CAP);
       });
 
+
+
       setImagesTotal((prev) => Math.min(prev + 1, EXPORT_CAP));
 
       //setInfoMsg("Image exported to history.");
@@ -2162,6 +2163,9 @@ export default function ImagesPage() {
 
     } catch (err) {
       setError(getErrorMessage(err));
+    } finally {
+      setRenderingId(null);
+      setIsRendering(false);
     }
   }
 
@@ -3334,14 +3338,26 @@ export default function ImagesPage() {
                     className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/60"
                   >
 
-                    <div className="aspect-square">
-
-                      { /* eslint-disable-next-line @next/next/no-img-element */}
+                    <div className="aspect-square relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={img.imageUrl}
                         alt={img.prompt}
-                        className="w-full h-full object-contain"
+                        loading="lazy"
+                        decoding="async"
+                        className={`w-full h-full object-contain transition-all duration-300
+                        ${loadingImgId === img.id ? "opacity-0 blur-md" : "opacity-100 blur-0"}
+                      `}
+                        onLoad={() => {
+                          if (loadingImgId === img.id) setLoadingImgId(null);
+                        }}
                       />
+
+                      {loadingImgId === img.id && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Spinner size={56} thickness={6} />
+                        </div>
+                      )}
                     </div>
 
                     <div className="p-2">
@@ -3456,17 +3472,23 @@ export default function ImagesPage() {
               <button
                 type="button"
                 onClick={handleRender}
-                disabled={!proDesignId}
-                //disabled={!proBaseImageUrl}
+                disabled={!proDesignId || isRendering}
                 className={`
-                rounded-lg px-3 py-2 text-md font-medium w-full border border-slate-800 
-                ${proBaseImageUrl
+                  rounded-lg px-3 py-2 text-md font-medium w-full border border-slate-800 
+                  ${proBaseImageUrl
                     ? "bg-emerald-500/70 hover:bg-emerald-500/90"
                     : "bg-emerald-600 opacity-40 cursor-not-allowed border-slate-700"}
-                          `}
-                title={!proBaseImageUrl ? "First generate or upload an image" : undefined}
+                  ${isRendering ? "opacity-70 cursor-wait" : ""}
+                `}
               >
-                Render / Export
+                {loadingImgId ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner size={16} thickness={2} />
+                    Rendering…
+                  </span>
+                ) : (
+                  "Render / Export"
+                )}
               </button>
             )}
 

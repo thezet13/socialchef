@@ -63,6 +63,70 @@ import { ImageAdjustments, renderCompositeImage } from './renderCompositeImage';
 
 const aiRouter: import("express").Router = Router();
 
+
+// ---- Export queue (production, single-node) ----
+type Task<T> = () => Promise<T>;
+
+class AsyncQueue {
+  private concurrency: number;
+  private active = 0;
+  private q: Array<{
+    run: Task<any>;
+    resolve: (v: any) => void;
+    reject: (e: any) => void;
+  }> = [];
+
+  constructor(concurrency: number) {
+    this.concurrency = Math.max(1, Math.floor(concurrency));
+  }
+
+  get size() {
+    return this.q.length;
+  }
+
+  get running() {
+    return this.active;
+  }
+
+  canAccept(maxQueued: number) {
+    return this.q.length < maxQueued;
+  }
+
+  add<T>(run: Task<T>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      this.q.push({ run, resolve, reject });
+      this.pump();
+    });
+  }
+
+  private pump() {
+    while (this.active < this.concurrency && this.q.length > 0) {
+      const item = this.q.shift()!;
+      this.active++;
+
+      (async () => {
+        try {
+          const res = await item.run();
+          item.resolve(res);
+        } catch (e) {
+          item.reject(e);
+        } finally {
+          this.active--;
+          this.pump();
+        }
+      })();
+    }
+  }
+}
+
+// Concurrency = 2
+const exportQueue = new AsyncQueue(2);
+
+// Max queued (not counting running)
+const EXPORT_QUEUE_LIMIT = 50;
+
+
+
 aiRouter.post("/pro-images/commit-preview",
   requireAuth,
   withTenant,
@@ -1651,45 +1715,69 @@ aiRouter.post("/pro-images/:id/render", requireAuth,
 
       ensureFontsRegistered();
 
-      const start = Date.now();
-      // ✅ render используем overlayClean
-      const pngBuffer = await renderCompositeImage({
-        baseImagePath: basePath,
-        outW,
-        outH,
-        baseW,
-        baseH,
-        baseTransform,
-        imageAdjustments: body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? undefined,
-        overlay: overlayClean,
-        uploadsDir,
-        watermark: watermarkEnabled,
-      });
-      const ms = Date.now() - start;
+      // ---- queued export (concurrency=2) ----
+      const queuedAt = Date.now();
 
-      console.log("EXPORT_TIME_MS", ms);
-
-      // export-only: no write, no db
-      if (!saveToH) {
-        res.setHeader("Content-Type", "image/png");
-        res.setHeader("Content-Disposition", `inline; filename="export_${outW}x${outH}.png"`);
-        return res.status(200).send(pngBuffer);
+      if (!exportQueue.canAccept(EXPORT_QUEUE_LIMIT)) {
+        return res.status(429).json({
+          error: "Server busy. Too many render jobs in queue. Please try again in a few seconds."
+        });
       }
 
-      // persist: write final file
-      const finalId = `final_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-      const finalFilename = `${finalId}.png`;
-      const finalPath = path.join(uploadsDir, finalFilename);
+      console.log("EXPORT_QUEUE_STATUS", {
+        running: exportQueue.running,
+        queued: exportQueue.size
+      });
 
-      fs.writeFileSync(finalPath, pngBuffer);
+      const result = await exportQueue.add(async () => {
+        // Можно логировать очередь для дебага
+        // (НЕ слишком часто, чтобы не спамить логи)
+        console.log("EXPORT_QUEUE", { active: exportQueue.running, queued: exportQueue.size });
 
-      const finalImageUrl = `/uploads/images/${finalFilename}`;
+        const startedAt = Date.now();
 
-      // ✅ объявляем ОДИН РАЗ
-      let generatedImageId: string | undefined;
-      let deletedFromHistory = 0;
+        const start = Date.now();
+        const pngBuffer = await renderCompositeImage({
+          baseImagePath: basePath,
+          outW,
+          outH,
+          baseW,
+          baseH,
+          baseTransform,
+          imageAdjustments: body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? undefined,
+          overlay: overlayClean,
+          uploadsDir,
+          watermark: watermarkEnabled,
+        });
+        const ms = Date.now() - start;
 
-      if (saveToH) {
+        // Сколько стояли в очереди (примерно)
+        const queuedMs = startedAt - queuedAt;
+
+        console.log("EXPORT_TIME_MS", ms, "QUEUED_MS", queuedMs);
+
+        // export-only: no write, no db
+        if (!saveToH) {
+          return {
+            kind: "buffer" as const,
+            pngBuffer,
+            outW,
+            outH,
+          };
+        }
+
+        // persist: write final file
+        const finalId = `final_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+        const finalFilename = `${finalId}.png`;
+        const finalPath = path.join(uploadsDir, finalFilename);
+
+        fs.writeFileSync(finalPath, pngBuffer);
+
+        const finalImageUrl = `/uploads/images/${finalFilename}`;
+
+        let generatedImageId: string | undefined;
+        let deletedFromHistory = 0;
+
         await prisma.proDesign.update({
           where: { id: design.id },
           data: {
@@ -1719,27 +1807,128 @@ aiRouter.post("/pro-images/:id/render", requireAuth,
           select: { id: true },
         });
 
-        // ✅ присваиваем, НЕ объявляем заново
         generatedImageId = created.id;
 
         const cap = await enforceExportHistory(prisma, tenantId, EXPORT_CAP);
         deletedFromHistory = cap.deleted;
+
+        return {
+          kind: "json" as const,
+          payload: {
+            proDesignId: design.id,
+            finalImageUrl,
+            generatedImageId,
+            width: outW,
+            height: outH,
+            requestedWidth: requestedOutW,
+            requestedHeight: requestedOutH,
+            plan,
+            maxAllowed,
+            saveToH,
+            watermarkEnabled,
+            deletedFromHistory,
+          },
+        };
+      });
+
+      // ---- send response outside queue ----
+      if (result.kind === "buffer") {
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Content-Disposition", `inline; filename="export_${result.outW}x${result.outH}.png"`);
+        return res.status(200).send(result.pngBuffer);
       }
 
-      return res.status(201).json({
-        proDesignId: design.id,
-        finalImageUrl,
-        generatedImageId,
-        width: outW,
-        height: outH,
-        requestedWidth: requestedOutW,
-        requestedHeight: requestedOutH,
-        plan,
-        maxAllowed,
-        saveToH,
-        watermarkEnabled,
-        deletedFromHistory, // дебаг: сколько удалили
-      });
+      return res.status(201).json(result.payload);
+
+      // const start = Date.now();
+      // // ✅ render используем overlayClean
+      // const pngBuffer = await renderCompositeImage({
+      //   baseImagePath: basePath,
+      //   outW,
+      //   outH,
+      //   baseW,
+      //   baseH,
+      //   baseTransform,
+      //   imageAdjustments: body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? undefined,
+      //   overlay: overlayClean,
+      //   uploadsDir,
+      //   watermark: watermarkEnabled,
+      // });
+      // const ms = Date.now() - start;
+
+      // console.log("EXPORT_TIME_MS", ms);
+
+      // // export-only: no write, no db
+      // if (!saveToH) {
+      //   res.setHeader("Content-Type", "image/png");
+      //   res.setHeader("Content-Disposition", `inline; filename="export_${outW}x${outH}.png"`);
+      //   return res.status(200).send(pngBuffer);
+      // }
+
+      // // persist: write final file
+      // const finalId = `final_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      // const finalFilename = `${finalId}.png`;
+      // const finalPath = path.join(uploadsDir, finalFilename);
+
+      // fs.writeFileSync(finalPath, pngBuffer);
+
+      // const finalImageUrl = `/uploads/images/${finalFilename}`;
+
+      // // ✅ объявляем ОДИН РАЗ
+      // let generatedImageId: string | undefined;
+      // let deletedFromHistory = 0;
+
+      // if (saveToH) {
+      //   await prisma.proDesign.update({
+      //     where: { id: design.id },
+      //     data: {
+      //       finalImageUrl,
+      //       overlayJson: overlayClean ? (overlayClean as any) : null,
+      //       baseTransformJson: baseTransform as any,
+      //       imageAdjustmentsJson: (body.imageAdjustments ?? (design as any).imageAdjustmentsJson ?? null) as any,
+      //       baseWidth: baseW,
+      //       baseHeight: baseH,
+      //       status: "RENDERED",
+      //       width: outW,
+      //       height: outH,
+      //     },
+      //   });
+
+      //   const created = await prisma.generatedImage.create({
+      //     data: {
+      //       tenantId,
+      //       prompt: design.prompt,
+      //       style: design.style ?? null,
+      //       imageUrl: finalImageUrl,
+      //       width: outW,
+      //       height: outH,
+      //       origin: "AI",
+      //       proDesignId: design.id,
+      //     },
+      //     select: { id: true },
+      //   });
+
+      //   // ✅ присваиваем, НЕ объявляем заново
+      //   generatedImageId = created.id;
+
+      //   const cap = await enforceExportHistory(prisma, tenantId, EXPORT_CAP);
+      //   deletedFromHistory = cap.deleted;
+      // }
+
+      // return res.status(201).json({
+      //   proDesignId: design.id,
+      //   finalImageUrl,
+      //   generatedImageId,
+      //   width: outW,
+      //   height: outH,
+      //   requestedWidth: requestedOutW,
+      //   requestedHeight: requestedOutH,
+      //   plan,
+      //   maxAllowed,
+      //   saveToH,
+      //   watermarkEnabled,
+      //   deletedFromHistory, // дебаг: сколько удалили
+      // });
 
     } catch (err) {
       console.error("[POST /ai/pro-images/:id/render] error", err);
