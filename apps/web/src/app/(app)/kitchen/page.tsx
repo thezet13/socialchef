@@ -3460,7 +3460,7 @@ export default function ImagesPage() {
                 )}
               </div>
             )}
-          </div>
+          </div> 
 
           <div className="py-3 px-5 flex justify-center">
 
@@ -3484,7 +3484,7 @@ export default function ImagesPage() {
                 {loadingImgId ? (
                   <span className="flex items-center justify-center gap-2">
                     <Spinner size={16} thickness={2} />
-                    Rendering…
+                    Rendering...
                   </span>
                 ) : (
                   "Render / Export"
