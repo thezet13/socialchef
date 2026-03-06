@@ -14,6 +14,7 @@ import { presetsRouter } from './modules/presets/presets.routes';
 import { adminRouter } from './modules/admin/admin.routes';
 import { stylesRouter } from './modules/styles/styles.routes';
 import { brandStylesRouter } from './modules/brand-styles/brandStyles.routes';
+import { designDnaRouter } from "./modules/design-dna";
 
 export function createServer() {
   const app = express();
@@ -61,6 +62,6 @@ export function createServer() {
   app.use("/presets", presetsRouter);
   app.use("/styles", stylesRouter);
   app.use("/brand-styles", brandStylesRouter);
-
+  app.use("/api/design-dna", designDnaRouter);
   return app;
 }

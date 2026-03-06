@@ -1,4 +1,7 @@
-import { DEFAULT_STYLE_BEHAVIOR, PATTERN_BY_POST_TYPE } from "../design-dna.constants";
+import {
+  DEFAULT_STYLE_BEHAVIOR,
+  PATTERN_BY_POST_TYPE,
+} from "../design-dna.constants";
 import type {
   CompositionPattern,
   DesignDNAInput,
@@ -17,6 +20,11 @@ export function selectPattern(input: DesignDNAInput): CompositionPattern {
 
   if (styleBehavior === "BOLD_PROMO") {
     if (candidates.includes("TOP_BADGE")) return "TOP_BADGE";
+  }
+
+  if (styleBehavior === "PREMIUM") {
+    if (candidates.includes("MINIMAL_CORNER")) return "MINIMAL_CORNER";
+    if (candidates.includes("BOTTOM_CARD")) return "BOTTOM_CARD";
   }
 
   return candidates[0];
